@@ -30,13 +30,13 @@ export function toDecimalString(value: string | number): string {
   return text;
 }
 
-export function tickerToSnapshot(pair: Pair | undefined, tickerId: string, ticker: Ticker, nowMs = Date.now()): MarketSnapshot {
+export function tickerToSnapshot(pair: Pair, tickerId: string, ticker: Ticker, nowMs = Date.now()): MarketSnapshot {
   const updatedAtMs = toEpochMs(ticker.server_time);
   const ageMs = Math.max(0, nowMs - updatedAtMs);
   return {
-    pairId: pair?.id ?? tickerId.replaceAll('_', ''),
+    pairId: pair.id,
     tickerId,
-    symbol: pair?.symbol ?? tickerId.replaceAll('_', '').toUpperCase(),
+    symbol: pair.symbol,
     name: undefined,
     last: toDecimalString(ticker.last), buy: toDecimalString(ticker.buy), sell: toDecimalString(ticker.sell),
     high24h: toDecimalString(ticker.high), low24h: toDecimalString(ticker.low),

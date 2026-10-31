@@ -12,3 +12,6 @@
 8. Endpoint `price_increments`, `ticker/btcidr`, dan `tradingview/history_v2` masih mengembalikan 403 dari jalur curl pada capture ini. Ini dicatat sebagai blocker verifikasi, bukan alasan untuk membuat fallback palsu; `/api/pairs` tidak lagi blocker setelah verifikasi browser.
 9. Biaya dan pajak tidak dipasang sebagai konstanta pasar. UI akan menyebut konfigurasi fee/tax bertanggal dan sumber resmi; nilai hanya diaktifkan setelah halaman resmi berhasil dibaca dan kebijakan yang berlaku dapat ditelusuri.
 10. v1 tidak menyimpan API key privat dan tidak mengirim order riil. Semua simulasi fill yang kelak dibuat wajib menggunakan orderbook/trade yang benar-benar diterima dan menolak simulasi saat data stale.
+11. Setelah audit, fallback summary-only dihapus. Jika `/api/pairs` gagal, seluruh market overview gagal aman; runtime tidak menebak `pairId` atau `symbol` dari `tickerId`.
+12. `/api/health` adalah health upstream market dan mengembalikan non-2xx saat market error/stale. `/api/ready` adalah readiness container yang hanya memastikan proses web hidup dan dipakai sebagai deployment health path.
+13. Origin publik terkonfirmasi dari publish pertama adalah `https://indosignal-mwcfpkru.manus.space`; origin ini dipakai untuk metadata canonical/sitemap/JSON-LD, bukan placeholder.

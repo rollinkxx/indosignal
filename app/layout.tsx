@@ -1,9 +1,11 @@
 import type { Metadata, Viewport } from 'next';
 import type { ReactNode } from 'react';
 import { AppShell } from '@/components/app-shell';
+import { SITE_ORIGIN } from '@/lib/site';
 import './globals.css';
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_ORIGIN),
   title: { default: 'indo signal — Data live Indodax yang transparan', template: '%s | indo signal' },
   description: 'Pantau pasar Indodax dari data live resmi, dengan paper trading yang transparan dan tanpa janji profit.',
   applicationName: 'indo signal',
@@ -18,5 +20,6 @@ export const metadata: Metadata = {
 export const viewport: Viewport = { themeColor: '#090b10', colorScheme: 'dark', width: 'device-width', initialScale: 1 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
-  return <html lang="id"><body><AppShell>{children}</AppShell><script src="/sw.js" defer /></body></html>;
+  const jsonLd = { '@context': 'https://schema.org', '@graph': [{ '@type': 'WebSite', name: 'indo signal', url: SITE_ORIGIN, inLanguage: 'id-ID' }, { '@type': 'Organization', name: 'indo signal', url: SITE_ORIGIN }] };
+  return <html lang="id"><body><AppShell>{children}</AppShell><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} /><link rel="manifest" href="/manifest.webmanifest" /><script src="/sw.js" defer /></body></html>;
 }

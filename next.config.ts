@@ -4,6 +4,7 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   output: 'standalone',
   typedRoutes: true,
+  allowedDevOrigins: ['127.0.0.1'],
   async headers() {
     return [{
       source: '/(.*)',
