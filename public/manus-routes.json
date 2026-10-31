@@ -1,0 +1,9 @@
+{
+  "routes": [
+    { "path": "/", "title": "indo signal — Sinyal pasar Indodax" },
+    { "path": "/pasar/:pair", "title": "Pasar :pair — indo signal" },
+    { "path": "/strategi/:slug", "title": "Strategi :slug — indo signal" },
+    { "path": "/edukasi/:artikel", "title": "Edukasi :artikel — indo signal" },
+    { "path": "/performa", "title": "Performa paper trading — indo signal" }
+  ]
+}

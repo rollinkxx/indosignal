@@ -1,0 +1,4 @@
+import type { Metadata } from 'next';
+export const dynamic = 'force-static';
+export async function generateMetadata({ params }: { params: Promise<{ artikel: string }> }): Promise<Metadata> { const { artikel } = await params; return { title: `Edukasi ${artikel}`, description: `Materi edukasi ${artikel} tentang data pasar dan risiko paper trading.` }; }
+export default async function EducationPage({ params }: { params: Promise<{ artikel: string }> }) { const { artikel } = await params; return <div className="page-wrap"><article className="empty-state"><p className="eyebrow">EDUKASI / SUMBER & RISIKO</p><h1>{artikel.replaceAll('-', ' ')}</h1><p>Materi ini akan memuat sumber, tanggal pembaruan, dan penulis. Konten tidak memberikan nasihat keuangan atau janji hasil.</p><p className="muted">Sumber awal: dokumentasi resmi API Indodax dan halaman biaya resmi Indodax.</p></article></div>; }

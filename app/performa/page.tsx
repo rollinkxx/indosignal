@@ -1,0 +1,3 @@
+import type { Metadata } from 'next';
+export const metadata: Metadata = { title: 'Performa paper trading', description: 'Performa paper trading indo signal akan tampil setelah ada trade tertutup yang dapat diaudit.' };
+export default function PerformancePage() { return <div className="page-wrap"><section className="empty-state"><p className="eyebrow">PERFORMA / PAPER TRADING</p><h1>Belum ada angka yang layak dipoles.</h1><p>Panel ini hanya akan menampilkan metrik dari trade tertutup, lengkap dengan jumlah sampel, interval Wilson, drawdown, profit factor, dan pembanding buy-and-hold.</p><p className="muted">Tidak ada data performa demo. Paper trading belum diaktifkan pada fase ingest.</p></section></div>; }
