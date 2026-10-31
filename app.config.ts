@@ -1,1 +1,1 @@
-export default { logoUrl: "https://static.indodax.com/d6d6d54/v2/logo/png/color/btc.png" };
+export default { logoUrl: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663996868412/fbsNhyobQetIwAdu.svg" };
