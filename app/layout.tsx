@@ -6,13 +6,14 @@ import './globals.css';
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_ORIGIN),
+  alternates: { canonical: '/', languages: { 'id-ID': '/' } },
   title: { default: 'indo signal — Data live Indodax yang transparan', template: '%s | indo signal' },
   description: 'Pantau pasar Indodax dari data live resmi, dengan paper trading yang transparan dan tanpa janji profit.',
   applicationName: 'indo signal',
   keywords: ['Indodax', 'paper trading', 'pasar kripto Indonesia', 'analisis risiko'],
   authors: [{ name: 'indo signal' }],
   creator: 'indo signal',
-  openGraph: { type: 'website', siteName: 'indo signal', title: 'indo signal — Data live Indodax yang transparan', description: 'Data live resmi, paper trading transparan, dan risiko yang terlihat.' },
+  openGraph: { type: 'website', url: SITE_ORIGIN, siteName: 'indo signal', title: 'indo signal — Data live Indodax yang transparan', description: 'Data live resmi, paper trading transparan, dan risiko yang terlihat.', images: [{ url: '/logo.svg', width: 512, height: 512, alt: 'indo signal' }] },
   twitter: { card: 'summary' },
   robots: { index: true, follow: true },
 };

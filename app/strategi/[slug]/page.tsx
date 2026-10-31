@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { getStrategy } from '@/lib/strategy/registry';
+import { SITE_ORIGIN } from '@/lib/site';
 export const dynamic = 'force-static';
-export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> { const { slug } = await params; return { title: `Strategi ${slug}`, description: `Dokumentasi strategi ${slug} untuk paper trading yang transparan.` }; }
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> { const { slug } = await params; return { title: `Strategi ${slug}`, description: `Dokumentasi strategi ${slug} untuk paper trading yang transparan.`, alternates: { canonical: `/strategi/${slug}`, languages: { 'id-ID': `/strategi/${slug}` } }, openGraph: { url: `${SITE_ORIGIN}/strategi/${slug}`, type: 'article' } }; }
 export default async function StrategyPage({ params }: { params: Promise<{ slug: string }> }) { const { slug } = await params; const strategy = getStrategy(slug); return <div className="page-wrap"><section className="empty-state"><p className="eyebrow">STRATEGI / REGISTRY</p><h1>{strategy?.name ?? slug.replaceAll('-', ' ')}</h1><p>{strategy?.description ?? 'Strategi tidak ditemukan pada registry.'}</p><p>Aktivasi hanya boleh dilakukan setelah backtest historis nyata, walk-forward out-of-sample, uji sensitivitas, dan forward-test paper minimal 14 hari.</p><p className="muted">Status saat ini: belum aktif. Tidak ada jaminan profit.</p></section></div>; }
