@@ -2,12 +2,17 @@ import { z } from 'zod';
 import { depthSchema, pairsSchema, serverTimeSchema, summariesSchema, tickerAllSchema, tradesSchema } from './schemas';
 import { pairByTicker, tickerToSnapshot, type MarketSnapshot } from './normalize';
 import { consumeProviderRequest } from './rate-limit';
+import { cached, resetCache } from './cache';
 
 const BASE = 'https://indodax.com';
 const TIMEOUT_MS = 8_000;
+const PAIRS_TTL_MS = 15 * 60_000;
+const SUMMARIES_TTL_MS = 3_000;
+const requestCounts = new Map<string, number>();
 
 async function requestJson<T>(path: string, schema: z.ZodType<T>): Promise<T> {
   consumeProviderRequest();
+  requestCounts.set(path, (requestCounts.get(path) ?? 0) + 1);
   const response = await fetch(`${BASE}${path}`, {
     cache: 'no-store',
     signal: AbortSignal.timeout(TIMEOUT_MS),
@@ -18,11 +23,13 @@ async function requestJson<T>(path: string, schema: z.ZodType<T>): Promise<T> {
   return schema.parse(payload);
 }
 
+export function getProviderRequestStats(): Record<string, number> { return Object.fromEntries(requestCounts.entries()); }
+export function resetIndodaxCaches(): void { requestCounts.clear(); resetCache(); }
+async function getPairs() { return cached('pairs', PAIRS_TTL_MS, () => requestJson('/api/pairs', pairsSchema)); }
+async function getSummaries() { return cached('summaries', SUMMARIES_TTL_MS, () => requestJson('/api/summaries', summariesSchema)); }
+
 export async function getMarketOverview(): Promise<{ markets: MarketSnapshot[]; updatedAtMs: number }> {
-  const [summaries, pairs] = await Promise.all([
-    requestJson('/api/summaries', summariesSchema),
-    requestJson('/api/pairs', pairsSchema),
-  ]);
+  const [summaries, pairs] = await Promise.all([getSummaries(), getPairs()]);
   const markets = Object.entries(summaries.tickers)
     .filter(([, ticker]) => ticker.vol_idr !== undefined)
     .map(([tickerId, ticker]) => {
@@ -36,8 +43,10 @@ export async function getMarketOverview(): Promise<{ markets: MarketSnapshot[]; 
 }
 
 export async function getMarketDetail(tickerId: string) {
-  const overview = await getMarketOverview();
-  const market = overview.markets.find((item) => item.tickerId === tickerId);
+  const [summaries, pairs] = await Promise.all([getSummaries(), getPairs()]);
+  const ticker = summaries.tickers[tickerId];
+  const pair = pairByTicker(pairs, tickerId);
+  const market = ticker && pair ? tickerToSnapshot(pair, tickerId, ticker) : undefined;
   if (!market) throw new Error('Pair tidak ditemukan pada ringkasan live.');
   const [depth, trades] = await Promise.all([
     requestJson(`/api/depth/${market.pairId}`, depthSchema),

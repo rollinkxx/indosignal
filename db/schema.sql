@@ -72,6 +72,36 @@ CREATE TABLE IF NOT EXISTS paper_fills (
   KEY paper_fills_order_idx (order_id, filled_at)
 );
 
+CREATE TABLE IF NOT EXISTS positions (
+  account_id CHAR(36) NOT NULL,
+  strategy_id CHAR(36) NOT NULL,
+  pair_id VARCHAR(64) NOT NULL,
+  base_amount DECIMAL(36,18) NOT NULL,
+  average_entry DECIMAL(36,18) NOT NULL,
+  stop_price DECIMAL(36,18) NULL,
+  realized_pnl DECIMAL(36,18) NOT NULL DEFAULT 0,
+  updated_at TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+  PRIMARY KEY (account_id, strategy_id, pair_id)
+);
+
+CREATE TABLE IF NOT EXISTS closed_trades (
+  id CHAR(36) NOT NULL PRIMARY KEY,
+  account_id CHAR(36) NOT NULL,
+  strategy_id CHAR(36) NOT NULL,
+  pair_id VARCHAR(64) NOT NULL,
+  entry_fill_id CHAR(36) NOT NULL,
+  exit_fill_id CHAR(36) NOT NULL,
+  base_amount DECIMAL(36,18) NOT NULL,
+  entry_price DECIMAL(36,18) NOT NULL,
+  exit_price DECIMAL(36,18) NOT NULL,
+  pnl_quote DECIMAL(36,18) NOT NULL,
+  pnl_r DECIMAL(36,18) NOT NULL,
+  closed_at TIMESTAMP(3) NOT NULL,
+  idempotency_key VARCHAR(180) NOT NULL,
+  UNIQUE KEY closed_trades_idempotency (idempotency_key),
+  KEY closed_trades_account_idx (account_id, closed_at)
+);
+
 CREATE TABLE IF NOT EXISTS decision_log (
   id CHAR(36) NOT NULL PRIMARY KEY,
   account_id CHAR(36) NOT NULL,
@@ -86,13 +116,15 @@ CREATE TABLE IF NOT EXISTS decision_log (
 
 CREATE TABLE IF NOT EXISTS fee_configs (
   id CHAR(36) NOT NULL PRIMARY KEY,
+  pair_id VARCHAR(64) NULL,
   source_url VARCHAR(512) NOT NULL,
   source_published_at DATE NULL,
   effective_from TIMESTAMP NOT NULL,
   maker_rate DECIMAL(18,12) NOT NULL,
   taker_rate DECIMAL(18,12) NOT NULL,
-  tax_rate DECIMAL(18,12) NOT NULL,
+  tax_buy_rate DECIMAL(18,12) NULL,
+  tax_sell_rate DECIMAL(18,12) NULL,
   assumptions_json JSON NOT NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  KEY fee_configs_effective_idx (effective_from)
+  KEY fee_configs_effective_idx (pair_id, effective_from)
 );

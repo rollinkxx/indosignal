@@ -12,6 +12,9 @@ export type MarketSnapshot = {
   high24h: string;
   low24h: string;
   volumeIdr24h: string;
+  pricePrecision?: string;
+  makerFeeRate?: string;
+  takerFeeRate?: string;
   updatedAtMs: number;
   source: 'rest' | 'websocket';
   status: MarketStatus;
@@ -41,6 +44,9 @@ export function tickerToSnapshot(pair: Pair, tickerId: string, ticker: Ticker, n
     last: toDecimalString(ticker.last), buy: toDecimalString(ticker.buy), sell: toDecimalString(ticker.sell),
     high24h: toDecimalString(ticker.high), low24h: toDecimalString(ticker.low),
     volumeIdr24h: toDecimalString(ticker.vol_idr ?? '0'),
+    pricePrecision: pair.price_precision === undefined ? undefined : toDecimalString(pair.price_precision),
+    makerFeeRate: pair.trade_fee_percent_maker === undefined ? undefined : toDecimalString(pair.trade_fee_percent_maker),
+    takerFeeRate: pair.trade_fee_percent_taker === undefined ? undefined : toDecimalString(pair.trade_fee_percent_taker),
     updatedAtMs, source: 'rest', status: ageMs > 30_000 ? 'stale' : 'live',
   };
 }
