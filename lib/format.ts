@@ -24,3 +24,7 @@ export function formatCompactIdr(value: string | number): string {
 export function formatTime(ms: number): string {
   return new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium', timeStyle: 'medium', timeZone: 'Asia/Jakarta' }).format(new Date(ms));
 }
+
+export function formatClock(ms: number): string {
+  return new Intl.DateTimeFormat('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false, timeZone: 'Asia/Jakarta' }).format(new Date(ms));
+}
