@@ -1,24 +1,20 @@
 import { readFile } from 'node:fs/promises';
-import mysql from 'mysql2/promise';
-
-const dsn = process.env.DATABASE_URL;
-if (!dsn) throw new Error('DATABASE_URL wajib tersedia untuk migrasi; tidak ada koneksi atau seed default.');
-const parsed = new URL(dsn);
+import pg from 'pg';
+const { Client } = pg;
+const connectionString = process.env.DATABASE_URL;
+if (!connectionString) throw new Error('DATABASE_URL wajib tersedia untuk migrasi; tidak ada koneksi atau seed default.');
 const schema = await readFile(new URL('../db/schema.sql', import.meta.url), 'utf8');
-const connection = await mysql.createConnection({
-  host: parsed.hostname,
-  port: Number(parsed.port || 3306),
-  user: decodeURIComponent(parsed.username),
-  password: decodeURIComponent(parsed.password),
-  database: decodeURIComponent(parsed.pathname.replace(/^\//, '')),
-  multipleStatements: true,
-  timezone: 'Z',
-  ssl: { rejectUnauthorized: true },
-});
+const client = new Client({ connectionString, ssl: { rejectUnauthorized: true }, connectionTimeoutMillis: 10_000 });
+await client.connect();
 try {
-  await connection.query(schema);
-  await connection.query('INSERT IGNORE INTO schema_migrations (version) VALUES (?)', ['0002-paper-positions-closed-trades']);
-  console.log('database migration applied: 0002-paper-positions-closed-trades');
+  await client.query('BEGIN');
+  await client.query(schema);
+  await client.query('INSERT INTO schema_migrations (version) VALUES ($1) ON CONFLICT (version) DO NOTHING', ['0003-postgresql-initial']);
+  await client.query('COMMIT');
+  console.log('database migration applied: 0003-postgresql-initial');
+} catch (error) {
+  await client.query('ROLLBACK');
+  throw error;
 } finally {
-  await connection.end();
+  await client.end();
 }

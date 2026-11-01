@@ -9,16 +9,21 @@ WORKDIR /app
 RUN corepack enable && corepack prepare pnpm@10.12.1 --activate
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+ENV NEXT_TELEMETRY_DISABLED=1
 RUN pnpm build
 
 FROM node:22-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
 ENV PORT=3000
-RUN addgroup --system --gid 1001 nodejs && adduser --system --uid 1001 nextjs
+RUN corepack enable && corepack prepare pnpm@10.12.1 --activate
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+RUN pnpm install --prod --frozen-lockfile
+COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-USER nextjs
+COPY --from=builder /app/next.config.ts ./next.config.ts
+COPY --from=builder /app/db ./db
+COPY --from=builder /app/scripts/migrate.mjs ./scripts/migrate.mjs
 EXPOSE 3000
-CMD ["node", "server.js"]
+CMD ["sh", "-c", "node scripts/migrate.mjs && node node_modules/next/dist/bin/next start -H 0.0.0.0 -p ${PORT:-3000}"]
