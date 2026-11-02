@@ -1,130 +1,57 @@
-CREATE TABLE IF NOT EXISTS schema_migrations (
-  version VARCHAR(64) NOT NULL PRIMARY KEY,
-  applied_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
-
+CREATE TABLE IF NOT EXISTS schema_migrations (version VARCHAR(64) PRIMARY KEY, applied_at TIMESTAMPTZ NOT NULL DEFAULT now());
 CREATE TABLE IF NOT EXISTS virtual_accounts (
-  id CHAR(36) NOT NULL PRIMARY KEY,
-  name VARCHAR(120) NOT NULL,
-  initial_idr DECIMAL(36,18) NOT NULL,
-  cash_idr DECIMAL(36,18) NOT NULL,
-  status ENUM('active','paused','disabled') NOT NULL DEFAULT 'active',
-  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+ id UUID PRIMARY KEY, name VARCHAR(120) NOT NULL, initial_idr NUMERIC(36,18) NOT NULL, cash_idr NUMERIC(36,18) NOT NULL,
+ status VARCHAR(16) NOT NULL DEFAULT 'active' CHECK (status IN ('active','paused','disabled')),
+ created_at TIMESTAMPTZ NOT NULL DEFAULT now(), updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
-
 CREATE TABLE IF NOT EXISTS strategies (
-  id CHAR(36) NOT NULL PRIMARY KEY,
-  slug VARCHAR(120) NOT NULL,
-  version VARCHAR(32) NOT NULL,
-  status ENUM('draft','backtest_required','paper_test','active','disabled') NOT NULL DEFAULT 'draft',
-  config_json JSON NOT NULL,
-  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  UNIQUE KEY strategies_slug_version (slug, version)
+ id UUID PRIMARY KEY, slug VARCHAR(120) NOT NULL, version VARCHAR(32) NOT NULL,
+ status VARCHAR(24) NOT NULL DEFAULT 'draft' CHECK (status IN ('draft','backtest_required','paper_test','active','disabled')),
+ config_json JSONB NOT NULL, created_at TIMESTAMPTZ NOT NULL DEFAULT now(), updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+ CONSTRAINT strategies_slug_version UNIQUE (slug, version)
 );
-
 CREATE TABLE IF NOT EXISTS candles (
-  pair_id VARCHAR(64) NOT NULL,
-  timeframe VARCHAR(12) NOT NULL,
-  open_time_ms BIGINT NOT NULL,
-  close_time_ms BIGINT NOT NULL,
-  open_price DECIMAL(36,18) NOT NULL,
-  high_price DECIMAL(36,18) NOT NULL,
-  low_price DECIMAL(36,18) NOT NULL,
-  close_price DECIMAL(36,18) NOT NULL,
-  volume_base DECIMAL(36,18) NOT NULL,
-  source VARCHAR(32) NOT NULL,
-  PRIMARY KEY (pair_id, timeframe, open_time_ms),
-  KEY candles_close_idx (pair_id, timeframe, close_time_ms)
+ pair_id VARCHAR(64) NOT NULL, timeframe VARCHAR(12) NOT NULL, open_time_ms BIGINT NOT NULL, close_time_ms BIGINT NOT NULL,
+ open_price NUMERIC(36,18) NOT NULL, high_price NUMERIC(36,18) NOT NULL, low_price NUMERIC(36,18) NOT NULL,
+ close_price NUMERIC(36,18) NOT NULL, volume_base NUMERIC(36,18) NOT NULL, source VARCHAR(32) NOT NULL,
+ PRIMARY KEY (pair_id, timeframe, open_time_ms)
 );
-
+CREATE INDEX IF NOT EXISTS candles_close_idx ON candles (pair_id, timeframe, close_time_ms);
 CREATE TABLE IF NOT EXISTS paper_orders (
-  id CHAR(36) NOT NULL PRIMARY KEY,
-  account_id CHAR(36) NOT NULL,
-  strategy_id CHAR(36) NOT NULL,
-  pair_id VARCHAR(64) NOT NULL,
-  side ENUM('buy','sell') NOT NULL,
-  order_type ENUM('market','limit') NOT NULL,
-  requested_base DECIMAL(36,18) NOT NULL,
-  limit_price DECIMAL(36,18) NULL,
-  status ENUM('open','partially_filled','filled','cancelled','rejected') NOT NULL,
-  idempotency_key VARCHAR(180) NOT NULL,
-  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  UNIQUE KEY paper_orders_idempotency (idempotency_key),
-  KEY paper_orders_account_idx (account_id, created_at)
+ id UUID PRIMARY KEY, account_id UUID NOT NULL, strategy_id UUID NOT NULL, pair_id VARCHAR(64) NOT NULL,
+ side VARCHAR(8) NOT NULL CHECK (side IN ('buy','sell')), order_type VARCHAR(8) NOT NULL CHECK (order_type IN ('market','limit')),
+ requested_base NUMERIC(36,18) NOT NULL, limit_price NUMERIC(36,18),
+ status VARCHAR(24) NOT NULL CHECK (status IN ('open','partially_filled','filled','cancelled','rejected')),
+ idempotency_key VARCHAR(180) NOT NULL UNIQUE, created_at TIMESTAMPTZ NOT NULL DEFAULT now(), updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
-
+CREATE INDEX IF NOT EXISTS paper_orders_account_idx ON paper_orders (account_id, created_at);
 CREATE TABLE IF NOT EXISTS paper_fills (
-  id CHAR(36) NOT NULL PRIMARY KEY,
-  order_id CHAR(36) NOT NULL,
-  event_id VARCHAR(180) NOT NULL,
-  base_amount DECIMAL(36,18) NOT NULL,
-  quote_amount DECIMAL(36,18) NOT NULL,
-  average_price DECIMAL(36,18) NOT NULL,
-  fee_amount DECIMAL(36,18) NOT NULL,
-  tax_amount DECIMAL(36,18) NOT NULL,
-  slippage_bps DECIMAL(18,8) NOT NULL,
-  source VARCHAR(32) NOT NULL,
-  filled_at TIMESTAMP(3) NOT NULL,
-  UNIQUE KEY paper_fills_event (order_id, event_id),
-  KEY paper_fills_order_idx (order_id, filled_at)
+ id UUID PRIMARY KEY, order_id UUID NOT NULL, event_id VARCHAR(180) NOT NULL, base_amount NUMERIC(36,18) NOT NULL,
+ quote_amount NUMERIC(36,18) NOT NULL, average_price NUMERIC(36,18) NOT NULL, fee_amount NUMERIC(36,18) NOT NULL,
+ tax_amount NUMERIC(36,18) NOT NULL, slippage_bps NUMERIC(18,8) NOT NULL, source VARCHAR(32) NOT NULL,
+ filled_at TIMESTAMPTZ NOT NULL, UNIQUE (order_id, event_id)
 );
-
+CREATE INDEX IF NOT EXISTS paper_fills_order_idx ON paper_fills (order_id, filled_at);
 CREATE TABLE IF NOT EXISTS positions (
-  account_id CHAR(36) NOT NULL,
-  strategy_id CHAR(36) NOT NULL,
-  pair_id VARCHAR(64) NOT NULL,
-  base_amount DECIMAL(36,18) NOT NULL,
-  average_entry DECIMAL(36,18) NOT NULL,
-  stop_price DECIMAL(36,18) NULL,
-  realized_pnl DECIMAL(36,18) NOT NULL DEFAULT 0,
-  updated_at TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
-  PRIMARY KEY (account_id, strategy_id, pair_id)
+ account_id UUID NOT NULL, strategy_id UUID NOT NULL, pair_id VARCHAR(64) NOT NULL, base_amount NUMERIC(36,18) NOT NULL,
+ average_entry NUMERIC(36,18) NOT NULL, stop_price NUMERIC(36,18), realized_pnl NUMERIC(36,18) NOT NULL DEFAULT 0,
+ updated_at TIMESTAMPTZ NOT NULL DEFAULT now(), PRIMARY KEY (account_id, strategy_id, pair_id)
 );
-
 CREATE TABLE IF NOT EXISTS closed_trades (
-  id CHAR(36) NOT NULL PRIMARY KEY,
-  account_id CHAR(36) NOT NULL,
-  strategy_id CHAR(36) NOT NULL,
-  pair_id VARCHAR(64) NOT NULL,
-  entry_fill_id CHAR(36) NOT NULL,
-  exit_fill_id CHAR(36) NOT NULL,
-  base_amount DECIMAL(36,18) NOT NULL,
-  entry_price DECIMAL(36,18) NOT NULL,
-  exit_price DECIMAL(36,18) NOT NULL,
-  pnl_quote DECIMAL(36,18) NOT NULL,
-  pnl_r DECIMAL(36,18) NOT NULL,
-  closed_at TIMESTAMP(3) NOT NULL,
-  idempotency_key VARCHAR(180) NOT NULL,
-  UNIQUE KEY closed_trades_idempotency (idempotency_key),
-  KEY closed_trades_account_idx (account_id, closed_at)
+ id UUID PRIMARY KEY, account_id UUID NOT NULL, strategy_id UUID NOT NULL, pair_id VARCHAR(64) NOT NULL,
+ entry_fill_id UUID NOT NULL, exit_fill_id UUID NOT NULL, base_amount NUMERIC(36,18) NOT NULL,
+ entry_price NUMERIC(36,18) NOT NULL, exit_price NUMERIC(36,18) NOT NULL, pnl_quote NUMERIC(36,18) NOT NULL,
+ pnl_r NUMERIC(36,18) NOT NULL, closed_at TIMESTAMPTZ NOT NULL, idempotency_key VARCHAR(180) NOT NULL UNIQUE
 );
-
+CREATE INDEX IF NOT EXISTS closed_trades_account_idx ON closed_trades (account_id, closed_at);
 CREATE TABLE IF NOT EXISTS decision_log (
-  id CHAR(36) NOT NULL PRIMARY KEY,
-  account_id CHAR(36) NOT NULL,
-  strategy_id CHAR(36) NOT NULL,
-  pair_id VARCHAR(64) NOT NULL,
-  candle_close_time_ms BIGINT NOT NULL,
-  action VARCHAR(32) NOT NULL,
-  reason_json JSON NOT NULL,
-  created_at TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-  UNIQUE KEY decision_idempotency (strategy_id, pair_id, candle_close_time_ms)
+ id UUID PRIMARY KEY, account_id UUID NOT NULL, strategy_id UUID NOT NULL, pair_id VARCHAR(64) NOT NULL,
+ candle_close_time_ms BIGINT NOT NULL, action VARCHAR(32) NOT NULL, reason_json JSONB NOT NULL,
+ created_at TIMESTAMPTZ NOT NULL DEFAULT now(), CONSTRAINT decision_idempotency UNIQUE (strategy_id, pair_id, candle_close_time_ms)
 );
-
 CREATE TABLE IF NOT EXISTS fee_configs (
-  id CHAR(36) NOT NULL PRIMARY KEY,
-  pair_id VARCHAR(64) NULL,
-  source_url VARCHAR(512) NOT NULL,
-  source_published_at DATE NULL,
-  effective_from TIMESTAMP NOT NULL,
-  maker_rate DECIMAL(18,12) NOT NULL,
-  taker_rate DECIMAL(18,12) NOT NULL,
-  tax_buy_rate DECIMAL(18,12) NULL,
-  tax_sell_rate DECIMAL(18,12) NULL,
-  assumptions_json JSON NOT NULL,
-  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  KEY fee_configs_effective_idx (pair_id, effective_from)
+ id UUID PRIMARY KEY, pair_id VARCHAR(64), source_url VARCHAR(512) NOT NULL, source_published_at DATE,
+ effective_from TIMESTAMPTZ NOT NULL, maker_rate NUMERIC(18,12) NOT NULL, taker_rate NUMERIC(18,12) NOT NULL,
+ tax_buy_rate NUMERIC(18,12), tax_sell_rate NUMERIC(18,12), assumptions_json JSONB NOT NULL, created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+CREATE INDEX IF NOT EXISTS fee_configs_effective_idx ON fee_configs (pair_id, effective_from);

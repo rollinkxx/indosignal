@@ -11,7 +11,7 @@ Implementasi akan bertahap. Fase awal yang dikerjakan sekarang adalah kontrak da
 - **Runtime web:** Next.js App Router + TypeScript, dengan route server untuk API internal dan SSR untuk halaman publik.
 - **Validasi:** Zod untuk respons Indodax dan boundary API internal. Parser menerima variasi timestamp detik/milidetik secara defensif dan tidak mengubah data menjadi nilai buatan.
 - **Ingest:** REST publik Indodax sebagai bootstrap/backfill/verifikasi silang; adapter WebSocket disiapkan sebagai sumber utama untuk stream market data setelah token static dikonfigurasi melalui secret. Rate limit internal menggunakan token bucket konservatif maksimum 120 request/menit.
-- **Persistence:** Drizzle ORM di atas managed MySQL-compatible database untuk candles, market snapshots, paper accounts, orders, fills, decisions, metrics, dan append-only trade log. Redis bukan capability bawaan proyek ini; tahap awal menggunakan database untuk durable state dan cache in-process hanya untuk snapshot non-durable. Redis/pub-sub akan ditambahkan sebagai keputusan infrastruktur terpisah bila worker multi-instance dibutuhkan.
+- **Persistence:** SQL langsung melalui driver `pg` di atas managed PostgreSQL untuk candles, market snapshots, paper accounts, orders, fills, decisions, metrics, dan append-only trade log. Redis bukan capability bawaan proyek ini; tahap awal menggunakan database untuk durable state dan cache in-process hanya untuk snapshot non-durable. Redis/pub-sub akan ditambahkan sebagai keputusan infrastruktur terpisah bila worker multi-instance dibutuhkan.
 - **Worker:** proses ingest terpisah dari request UI, dapat dijalankan melalui endpoint/command worker pada fase berikutnya. UI selalu menerima status `loading`, `live`, `stale`, atau `error` beserta waktu update terakhir.
 - **PWA:** application-owned manifest dan service worker ringan yang hanya melakukan cache shell; data pasar tidak dicache sebagai data baru. Offline menampilkan snapshot terakhir dengan label data lama.
 - **SEO:** SSR untuk beranda dan halaman pasar yang hanya menampilkan data publik; metadata route-specific, `robots`, `sitemap`, JSON-LD, dan `manus-routes.json`. Dashboard/akun nantinya diberi `noindex`.
@@ -65,7 +65,7 @@ lib/
   market-store.ts            # snapshot/read model fase awal
   format.ts                  # id-ID currency/time formatting
   config.ts                  # env parsing, public origin
-  db.ts                      # Drizzle connection (fase persistence)
+  db.ts                      # PostgreSQL connection pool (`pg`)
 docs/
   DECISIONS.md               # asumsi dan trade-off
   DATA_CONTRACT.md           # kontrak data live + freshness
@@ -79,7 +79,7 @@ scripts/
   check-no-market-mocks.mjs
   check-live-endpoints.mjs
   capture-indodax-samples.mjs
-  db-migrate.mjs
+  migrate.mjs
 tests/
   unit/
   integration/

@@ -34,9 +34,12 @@ export const depthLevelSchema = z.tuple([numeric, numeric]);
 export const depthSchema = z.object({ buy: z.array(depthLevelSchema), sell: z.array(depthLevelSchema) });
 export const tradeSchema = z.object({ tid: z.string(), type: z.enum(['buy', 'sell']), price: numeric, amount: numeric, date: timestamp });
 export const tradesSchema = z.array(tradeSchema);
+export const historyCandleSchema = z.object({ Time: timestamp, Open: numeric, High: numeric, Low: numeric, Close: numeric, Volume: numeric });
+export const historySchema = z.array(historyCandleSchema);
 
 export type Pair = z.infer<typeof pairSchema>;
 export type Ticker = z.infer<typeof tickerSchema>;
 export type SummaryResponse = z.infer<typeof summariesSchema>;
 export type Depth = z.infer<typeof depthSchema>;
 export type Trade = z.infer<typeof tradeSchema>;
+export type HistoryCandle = z.infer<typeof historyCandleSchema>;

@@ -1,13 +1,19 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it, vi } from 'vitest';
-import { formatIdr } from '../lib/format';
+import { formatClock, formatIdr } from '../lib/format';
 import { cached, resetCache } from '../lib/indodax/cache';
 import { getMarketDetail, getMarketOverview, getProviderRequestStats, resetIndodaxCaches } from '../lib/indodax/client';
 import { pairByTicker, tickerToSnapshot } from '../lib/indodax/normalize';
 import type { Pair, Ticker } from '../lib/indodax/schemas';
 
 const sample = (name: string) => JSON.parse(readFileSync(resolve(process.cwd(), 'docs/api-samples', name), 'utf8')) as unknown;
+
+describe('format waktu publik', () => {
+  it('menampilkan jam snapshot dalam WIB', () => {
+    expect(formatClock(Date.parse('2026-11-01T17:45:57.000Z'))).toBe('00.45.57');
+  });
+});
 
 describe('price precision dari pairs live', () => {
   it('tidak membulatkan PEPEIDR menjadi Rp 0', () => {

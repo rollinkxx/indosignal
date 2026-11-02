@@ -1,6 +1,7 @@
 import { z } from 'zod';
-import { depthSchema, pairsSchema, serverTimeSchema, summariesSchema, tickerAllSchema, tradesSchema } from './schemas';
+import { depthSchema, historySchema, pairsSchema, serverTimeSchema, summariesSchema, tickerAllSchema, tradesSchema } from './schemas';
 import { pairByTicker, tickerToSnapshot, type MarketSnapshot } from './normalize';
+import type { ClosedCandle } from '../paper/types';
 import { consumeProviderRequest } from './rate-limit';
 import { cached, resetCache } from './cache';
 
@@ -57,3 +58,17 @@ export async function getMarketDetail(tickerId: string) {
 
 export async function getServerTime() { return requestJson('/api/server_time', serverTimeSchema); }
 export async function getTickerAll() { return requestJson('/api/ticker_all', tickerAllSchema); }
+
+export async function getHistoricalCandles(pairId: string, fromMs: number, toMs: number, timeframe = '60'): Promise<ClosedCandle[]> {
+  const pairs = await getPairs();
+  const pair = pairs.find((candidate) => candidate.id === pairId);
+  if (!pair) throw new Error(`Pair ${pairId} tidak ditemukan pada respons /api/pairs.`);
+  const params = new URLSearchParams({ from: String(Math.floor(fromMs / 1000)), to: String(Math.floor(toMs / 1000)), tf: timeframe, symbol: pair.symbol });
+  const rows = await requestJson(`/tradingview/history_v2?${params.toString()}`, historySchema);
+  const multiplier = timeframe === '1D' ? 86_400_000 : timeframe === '3D' ? 3 * 86_400_000 : timeframe === '1W' ? 7 * 86_400_000 : Number(timeframe) * 60_000;
+  return rows.map((row) => { const openTimeMs = Number(row.Time) * 1000; return { pairId, timeframe, openTimeMs, closeTimeMs: openTimeMs + multiplier, open: row.Open, high: row.High, low: row.Low, close: row.Close, volume: row.Volume, source: 'history_v2' as const }; }).filter((candle) => candle.closeTimeMs <= toMs && candle.closeTimeMs > candle.openTimeMs);
+}
+
+export async function getPairById(pairId: string) {
+  return (await getPairs()).find((pair) => pair.id === pairId);
+}

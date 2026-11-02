@@ -11,19 +11,22 @@
     "test": "vitest run",
     "db:migrate": "node scripts/migrate.mjs",
     "db:restart-proof": "tsx scripts/db-restart-proof.ts",
+    "db:forward-test-proof": "tsx scripts/forward-test-db-proof.ts",
+    "db:multi-pair-proof": "tsx scripts/multi-pair-scan-db-proof.ts",
     "check:market-mocks": "node scripts/check-no-market-mocks.mjs",
     "check:live": "node scripts/check-live-endpoints.mjs"
   },
   "dependencies": {
     "decimal.js": "10.5.0",
-    "mysql2": "3.14.1",
     "next": "16.4.3",
+    "pg": "8.23.1",
     "react": "19.3.1",
     "react-dom": "19.3.1",
     "zod": "3.25.67"
   },
   "devDependencies": {
     "@types/node": "22.15.30",
+    "@types/pg": "8.23.1",
     "@types/react": "19.1.2",
     "@types/react-dom": "19.1.2",
     "tsx": "4.19.4",
