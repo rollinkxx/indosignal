@@ -30,6 +30,7 @@
 - [ ] Registry plugin berversi: EMA20/50/200 + ADX, Donchian + volume, RSI + Bollinger pada sideways, multi-timeframe 4h/1D untuk entry 15m/1h, dan regime gate.
 - [ ] Strategi hanya aktif setelah backtest historis nyata dengan biaya, walk-forward/OOS, sensitivitas anti-overfitting, dan forward-test paper minimal 14 hari.
 - [ ] Backtest dan paper ditampilkan berdampingan tanpa klaim profit terjamin.
+- [ ] Endpoint sinyal observasi dan backtest strategi menggunakan candle tertutup resmi, keputusan tanpa look-ahead, asumsi spot/biaya/ukuran risiko yang transparan, walk-forward/OOS, dan tidak mengirim order riil.
 
 ## Fase 4 — SEO dan performa
 
