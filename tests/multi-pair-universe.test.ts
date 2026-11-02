@@ -7,7 +7,7 @@ const now = 1_800_000_000_000;
 function pair(id: string, extra: Partial<Pair> = {}): Pair {
   return {
     id, symbol: id.toUpperCase(), ticker_id: `${id.toUpperCase()}_IDR`,
-    base_currency: id.replace(/idr$/i, ''), traded_currency: 'idr',
+    base_currency: 'idr', traded_currency: id.replace(/idr$/i, ''),
     trade_fee_percent_taker: '0.3', trade_fee_percent_maker: '0.2',
     ...extra,
   };
