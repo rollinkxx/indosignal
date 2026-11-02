@@ -73,7 +73,7 @@ async function scanOne(run: MultiPairScanRun, pair: MultiPairUniverse['pairs'][n
     return;
   }
   if (!strategy) throw new Error('Strategi trend-following tidak terdaftar.');
-  const signal = strategy.evaluate({ candles: indicators, regime: regimeForStrategy(strategy, sorted) });
+  const signal = strategy.evaluate({ candles: indicators, regime: regimeForStrategy(sorted) });
   const volatility = atr(indicators).at(-1);
   const saved = await repository.recordObservation({
     runId: run.id,

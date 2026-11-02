@@ -36,5 +36,6 @@ export async function register(): Promise<void> {
     startForwardTestWorker();
   } catch (error) {
     console.error('[startup] paper scanners not started:', error instanceof Error ? error.message.slice(0, 300) : 'database unavailable');
+    throw error;
   }
 }

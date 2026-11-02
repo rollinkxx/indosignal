@@ -3,8 +3,15 @@ import pg from 'pg';
 import { backfillAuditChain } from './audit-chain-backfill.mjs';
 
 const { Client } = pg;
-const connectionString = process.env.MIGRATION_DATABASE_URL ?? process.env.DATABASE_URL;
-if (!connectionString) throw new Error('MIGRATION_DATABASE_URL atau DATABASE_URL wajib tersedia untuk migrasi; tidak ada koneksi atau seed default.');
+const isProduction = process.env.NODE_ENV === 'production';
+const allowRuntimeFallback = process.env.ALLOW_RUNTIME_DATABASE_MIGRATION === 'true';
+const connectionString = process.env.MIGRATION_DATABASE_URL
+  ?? (!isProduction && allowRuntimeFallback ? process.env.DATABASE_URL : undefined);
+if (!connectionString) {
+  throw new Error(isProduction
+    ? 'MIGRATION_DATABASE_URL wajib tersedia di production; DATABASE_URL runtime tidak boleh digunakan sebagai migrator.'
+    : 'MIGRATION_DATABASE_URL wajib tersedia; fallback DATABASE_URL hanya aktif jika ALLOW_RUNTIME_DATABASE_MIGRATION=true.');
+}
 
 const migrationSsl = process.env.MIGRATION_DATABASE_SSL ?? process.env.DATABASE_SSL;
 const client = new Client({ connectionString, ssl: migrationSsl === 'disable' ? false : { rejectUnauthorized: true }, connectionTimeoutMillis: 10_000 });

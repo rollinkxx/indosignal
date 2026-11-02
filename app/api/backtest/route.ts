@@ -120,7 +120,7 @@ export async function GET(request: Request) {
         maxAllowedDrawdownFraction: 0.2,
       };
       const gate = activationGate(evidence);
-      const regime = regimeForStrategy(strategy, candles);
+      const regime = regimeForStrategy(candles);
       return {
         ok: true,
         strategy: strategy.slug,
