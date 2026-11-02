@@ -54,11 +54,11 @@ describe('request count per visit', () => {
     }));
     resetIndodaxCaches();
     await getMarketOverview();
-    expect(getProviderRequestStats()).toEqual({ '/api/summaries': 1, '/api/pairs': 1 });
+    expect(getProviderRequestStats()).toMatchObject({ '/api/summaries': { count: 1, errors: 0 }, '/api/pairs': { count: 1, errors: 0 } });
     await getMarketOverview();
-    expect(getProviderRequestStats()).toEqual({ '/api/summaries': 1, '/api/pairs': 1 });
+    expect(getProviderRequestStats()).toMatchObject({ '/api/summaries': { count: 1 }, '/api/pairs': { count: 1 } });
     await getMarketDetail('btc_idr');
-    expect(getProviderRequestStats()).toEqual({ '/api/summaries': 1, '/api/pairs': 1, '/api/depth/btcidr': 1, '/api/trades/btcidr': 1 });
+    expect(getProviderRequestStats()).toMatchObject({ '/api/summaries': { count: 1 }, '/api/pairs': { count: 1 }, '/api/depth/:pair': { count: 1 }, '/api/trades/:pair': { count: 1 } });
     vi.unstubAllGlobals();
   });
 });

@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { PaperRepository } from '../lib/db/paper-repository';
+import { getDbPool } from '../lib/db/client';
 
 async function main() {
   const repository = new PaperRepository();
@@ -12,8 +13,21 @@ async function main() {
     return;
   }
   const accountId = randomUUID();
-  const trade = { id: randomUUID(), accountId, strategyId: 'restart-proof-strategy', pairId: 'btcidr', entryFillId: 'restart-proof-entry', exitFillId: 'restart-proof-exit', baseAmount: '0.000001', entryPrice: '1', exitPrice: '1', pnlQuote: '0', pnlR: '0', closedAtMs: Date.now(), idempotencyKey: `restart-proof:${accountId}` };
+  const strategyId = randomUUID();
+  const entryOrderId = randomUUID();
+  const exitOrderId = randomUUID();
+  const entryFillId = randomUUID();
+  const exitFillId = randomUUID();
+  const nowMs = Date.now();
+  const trade = { id: randomUUID(), accountId, strategyId, pairId: 'btcidr', entryFillId, exitFillId, baseAmount: '0.000001', entryPrice: '1', exitPrice: '1', pnlQuote: '0', pnlR: '0', closedAtMs: nowMs, idempotencyKey: `restart-proof:${accountId}` };
   try {
+    await getDbPool().query('INSERT INTO virtual_accounts (id,name,initial_idr,cash_idr) VALUES ($1,$2,$3,$3)', [accountId, 'restart proof', '100']);
+    await getDbPool().query('INSERT INTO strategies (id,slug,version,status,config_json) VALUES ($1,$2,$3,$4,$5::jsonb)', [strategyId, `restart-proof-${accountId}`, '1.0.0', 'paper_test', '{}']);
+    for (const [orderId, fillId, side] of [[entryOrderId, entryFillId, 'buy'], [exitOrderId, exitFillId, 'sell']] as const) {
+      await getDbPool().query(`INSERT INTO paper_orders (id,account_id,strategy_id,pair_id,side,order_type,requested_base,status,idempotency_key) VALUES ($1,$2,$3,'btcidr',$4,'market','0.000001','filled',$5)`, [orderId, accountId, strategyId, side, `${side}:${accountId}`]);
+      await getDbPool().query(`INSERT INTO paper_fills (id,order_id,event_id,base_amount,quote_amount,average_price,fee_amount,tax_amount,slippage_bps,source,filled_at) VALUES ($1,$2,$3,'0.000001','1','1','0','0','0','rest-orderbook',now())`, [fillId, orderId, `event:${fillId}`]);
+    }
+    await repository.upsertPosition({ accountId, strategyId, pairId: 'btcidr', baseAmount: '0.000001', averageEntry: '1' });
     const first = await repository.recordClosedTrade(trade);
     const duplicate = await repository.recordClosedTrade(trade);
     const state = await repository.readState(accountId);

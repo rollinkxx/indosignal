@@ -1,11 +1,13 @@
 import { readdir, readFile } from 'node:fs/promises';
 import pg from 'pg';
+import { backfillAuditChain } from './audit-chain-backfill.mjs';
 
 const { Client } = pg;
-const connectionString = process.env.DATABASE_URL;
-if (!connectionString) throw new Error('DATABASE_URL wajib tersedia untuk migrasi; tidak ada koneksi atau seed default.');
+const connectionString = process.env.MIGRATION_DATABASE_URL ?? process.env.DATABASE_URL;
+if (!connectionString) throw new Error('MIGRATION_DATABASE_URL atau DATABASE_URL wajib tersedia untuk migrasi; tidak ada koneksi atau seed default.');
 
-const client = new Client({ connectionString, ssl: process.env.DATABASE_SSL === 'disable' ? false : { rejectUnauthorized: true }, connectionTimeoutMillis: 10_000 });
+const migrationSsl = process.env.MIGRATION_DATABASE_SSL ?? process.env.DATABASE_SSL;
+const client = new Client({ connectionString, ssl: migrationSsl === 'disable' ? false : { rejectUnauthorized: true }, connectionTimeoutMillis: 10_000 });
 const migrationLock = 'SELECT pg_advisory_xact_lock(141414, 1004)';
 
 await client.connect();
@@ -42,6 +44,11 @@ try {
     await client.query('INSERT INTO schema_migrations (version) VALUES ($1)', [version]);
     await client.query('COMMIT');
     console.log(`database migration applied: ${version}`);
+  }
+  const auditMigration = await client.query('SELECT 1 FROM schema_migrations WHERE version=$1', ['0008-event_hash_chain']);
+  if (auditMigration.rowCount) {
+    const result = await backfillAuditChain(client);
+    console.log(`forward-test audit hash chain verified/backfilled: ${result.backfilled} event(s)`);
   }
 } catch (error) {
   try { await client.query('ROLLBACK'); } catch { /* transaction may already be closed */ }

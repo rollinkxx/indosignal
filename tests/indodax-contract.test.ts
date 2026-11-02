@@ -13,6 +13,8 @@ describe('kontrak respons live Indodax', () => {
   it('menerima sampel ticker all aktual', () => expect(Object.keys(tickerAllSchema.parse(sample('ticker_all.json')).tickers)).toHaveLength(450));
   it('menerima sampel depth aktual', () => expect(depthSchema.parse(sample('depth_btcidr.json')).buy).toHaveLength(150));
   it('menerima sampel trades aktual', () => expect(tradesSchema.parse(sample('trades_btcidr.json'))).toHaveLength(500));
+  it('menolak depth yang tidak terurut atau crossed', () => { expect(() => depthSchema.parse({ buy: [['10', '1'], ['11', '1']], sell: [['12', '1']] })).toThrow(); expect(() => depthSchema.parse({ buy: [['13', '1']], sell: [['12', '1']] })).toThrow(); });
+  it('menolak nilai numerik non-finite pada ticker', () => { expect(() => summariesSchema.parse({ tickers: { btc_idr: { high: 'Infinity', low: '1', last: '2', buy: '1', sell: '2', server_time: 1 } }, prices_24h: {}, prices_7d: {} })).toThrow(); });
 });
 
 describe('normalisasi timestamp defensif', () => {

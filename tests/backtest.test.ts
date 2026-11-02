@@ -87,4 +87,33 @@ describe('historical backtest', () => {
     expect(metrics.equityCurve).toEqual([10000, 9900]);
     expect(metrics.riskAdjustedReturnBasis).toBe('per_closed_trade_unannualized');
   });
+
+  it('uses marked equity for open-position drawdown and serializes safe ratios', () => {
+    const metrics = performanceMetrics([], '10000', [
+      { timeMs: start, value: '10000' },
+      { timeMs: start + 3_600_000, value: '9000' },
+      { timeMs: start + 7_200_000, value: '11000' },
+    ]);
+    expect(metrics.maxDrawdown).toBeCloseTo(0.1);
+    expect(metrics.equityCurve).toEqual([10000, 9000, 11000]);
+    expect(metrics.profitFactor).toBe(0);
+    expect(JSON.stringify(metrics)).not.toContain('Infinity');
+  });
+
+  it('reports actual position exposure fraction from entry and close timestamps', () => {
+    const metrics = performanceMetrics([{ pnlQuote: '10', pnlR: '1', equityAfter: '10010', openedAtMs: start, closedAtMs: start + 3_600_000 }], '10000', [
+      { timeMs: start, value: '10000' }, { timeMs: start + 7_200_000, value: '10010' },
+    ]);
+    expect(metrics.exposureTimeFraction).toBeCloseTo(0.5);
+  });
+
+  it('applies stop ATR sensitivity and rejects non-finite cost inputs', () => {
+    const data = candles();
+    data[16] = { ...data[16], low: '93' };
+    const strategy = scriptedStrategy((length) => length === 15 ? 'buy' : 'hold');
+    const tight = runBacktest(data, strategy, { initialEquity: '10000', fee, stopAtrMultiplier: 1.5 });
+    const wide = runBacktest(data, strategy, { initialEquity: '10000', fee, stopAtrMultiplier: 2.5 });
+    expect(Number(tight.equity)).toBeLessThan(Number(wide.equity));
+    expect(() => runBacktest(data, strategy, { initialEquity: '10000', fee, slippageBps: Number.NaN })).toThrow(/finite/);
+  });
 });

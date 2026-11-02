@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto';
+import { canonicalJson, makeAuditEnvelope, nextAuditHash, ZERO_HASH } from '../audit/hash-chain.mjs';
 import Decimal from 'decimal.js';
 import type { PoolClient } from 'pg';
 import { getDbPool } from '@/lib/db/client';
@@ -137,10 +138,34 @@ async function appendEvent(
   client: PoolClient,
   input: { runId: string; key: string; kind: string; sourceEventTimeMs?: number | null; occurredAtMs: number; payload: Record<string, unknown> },
 ): Promise<void> {
-  await client.query(
+  // Global transaction lock also serializes this insert against the one-time chain backfill.
+  await client.query('SELECT pg_advisory_xact_lock(141414, 1008)');
+  const eventId = randomUUID();
+  const inserted = await client.query<{ id: string; created_at_exact: string }>(
     `INSERT INTO forward_test_events (id, run_id, idempotency_key, event_kind, source_event_time_ms, occurred_at_ms, payload_json)
-     VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb) ON CONFLICT (run_id, idempotency_key) DO NOTHING`,
-    [randomUUID(), input.runId, input.key, input.kind, input.sourceEventTimeMs ?? null, input.occurredAtMs, JSON.stringify(input.payload)],
+     VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb)
+     ON CONFLICT (run_id, idempotency_key) DO NOTHING
+     RETURNING id, to_char(created_at, 'YYYY-MM-DD"T"HH24:MI:SS.USOF') AS created_at_exact`,
+    [eventId, input.runId, input.key, input.kind, input.sourceEventTimeMs ?? null, input.occurredAtMs, JSON.stringify(input.payload)],
+  );
+  if (!inserted.rows[0]) return;
+  const previous = await client.query<{ sequence: string; event_hash: string }>(
+    'SELECT sequence::text, event_hash FROM forward_test_event_chain WHERE run_id=$1 ORDER BY sequence DESC LIMIT 1',
+    [input.runId],
+  );
+  const sequence = Number(previous.rows[0]?.sequence ?? 0) + 1;
+  const previousHash = previous.rows[0]?.event_hash ?? ZERO_HASH;
+  const envelope = makeAuditEnvelope({
+    runId: input.runId, eventId: inserted.rows[0].id, idempotencyKey: input.key, eventKind: input.kind,
+    sourceEventTimeMs: input.sourceEventTimeMs ?? null, occurredAtMs: input.occurredAtMs,
+    createdAt: inserted.rows[0].created_at_exact, payload: input.payload,
+  }, sequence);
+  const canonicalEvent = canonicalJson(envelope);
+  const eventHash = nextAuditHash(previousHash, canonicalEvent);
+  await client.query(
+    `INSERT INTO forward_test_event_chain (run_id, sequence, event_id, idempotency_key, previous_hash, event_hash, canonical_event)
+     VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+    [input.runId, sequence, inserted.rows[0].id, input.key, previousHash, eventHash, canonicalEvent],
   );
 }
 
