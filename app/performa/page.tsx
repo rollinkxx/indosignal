@@ -69,7 +69,7 @@ export default async function PerformancePage() {
           <p className="muted">{error}</p>
         )}
         <p>Paper trading otomatis tetap nonaktif hingga forward-test minimal 14 hari, pencatatan decision/fill restart-safe, dan pemeriksaan sensitivitas selesai.</p>
-        <p><a href="/api/backtest?strategy=trend-following&pair=btcidr&days=90&tf=60">Lihat laporan JSON backtest</a> · <a href="/api/signals?strategy=trend-following&pair=btcidr&tf=60">Lihat sinyal terbaru</a></p>
+        <p><a href="/api/backtest?strategy=trend-following&pair=btcidr&days=90&tf=60">Lihat laporan JSON backtest</a> · <a href="/api/signals?strategy=trend-following&pair=btcidr&tf=60">Lihat sinyal terbaru</a> · <a href="/api/forward-test/status">Status forward-test 14 hari</a></p>
       </section>
     </div>
   );

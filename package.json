@@ -11,6 +11,7 @@
     "test": "vitest run",
     "db:migrate": "node scripts/migrate.mjs",
     "db:restart-proof": "tsx scripts/db-restart-proof.ts",
+    "db:forward-test-proof": "tsx scripts/forward-test-db-proof.ts",
     "check:market-mocks": "node scripts/check-no-market-mocks.mjs",
     "check:live": "node scripts/check-live-endpoints.mjs"
   },

@@ -22,6 +22,8 @@
 - [ ] Akun virtual persisten/idempoten dengan saldo awal IDR yang dapat diatur dan banyak strategi paralel.
 - [ ] Market fill menyapu orderbook nyata dengan slippage; limit fill hanya bila trade nyata melewati harga; price increment, minimum order, biaya, dan pajak diterapkan.
 - [ ] Sinyal hanya pada candle close tanpa look-ahead; alasan keputusan dicatat; trade log append-only.
+- [ ] Migrasi forward-test bernomor/additive, worker satu-instance dengan advisory lock, dan transaksi atomik untuk keputusan/order/fill/ledger/posisi/trade.
+- [ ] Restart process nyata membuktikan cursor, saldo, posisi, fills, dan trade pulih persis; retry key sama tidak menggandakan efek.
 - [ ] Risiko <=1% ekuitas per trade, ATR stop-loss, batas posisi, circuit breaker rugi harian, batas korelasi, dan auto-disable performa buruk.
 - [ ] Metrik trade tertutup menampilkan winrate + Wilson CI + sample count, peringatan <30 trade, profit factor, expectancy R, average win/loss, max drawdown, Sharpe/Sortino, equity curve, dan buy-and-hold.
 
@@ -29,6 +31,7 @@
 
 - [ ] Registry plugin berversi: EMA20/50/200 + ADX, Donchian + volume, RSI + Bollinger pada sideways, multi-timeframe 4h/1D untuk entry 15m/1h, dan regime gate.
 - [ ] Strategi hanya aktif setelah backtest historis nyata dengan biaya, walk-forward/OOS, sensitivitas anti-overfitting, dan forward-test paper minimal 14 hari.
+- [ ] Run produksi mengumpulkan >=337 candle 1 jam closed-only yang berurutan selama >=14 hari, heartbeat sehat, tanpa gap, sebelum hasil dapat diklaim lulus.
 - [ ] Backtest dan paper ditampilkan berdampingan tanpa klaim profit terjamin.
 - [ ] Endpoint sinyal observasi dan backtest strategi menggunakan candle tertutup resmi, keputusan tanpa look-ahead, asumsi spot/biaya/ukuran risiko yang transparan, walk-forward/OOS, dan tidak mengirim order riil.
 

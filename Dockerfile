@@ -25,5 +25,6 @@ COPY --from=builder /app/public ./public
 COPY --from=builder /app/next.config.ts ./next.config.ts
 COPY --from=builder /app/db ./db
 COPY --from=builder /app/scripts/migrate.mjs ./scripts/migrate.mjs
+COPY --from=builder /app/scripts/migrations ./scripts/migrations
 EXPOSE 3000
 CMD ["sh", "-c", "node scripts/migrate.mjs && node node_modules/next/dist/bin/next start -H 0.0.0.0 -p ${PORT:-3000}"]

@@ -5,6 +5,7 @@ import { runBacktest, walkForwardSplits } from '@/lib/strategy/backtest';
 import { getStrategy, activationGate } from '@/lib/strategy/registry';
 import { regimeForStrategy } from '@/lib/strategy/evaluation';
 import { performanceMetrics } from '@/lib/paper/metrics';
+import { ForwardTestRepository } from '@/lib/forward-test/repository';
 
 export const dynamic = 'force-dynamic';
 
@@ -54,11 +55,15 @@ export async function GET(request: Request) {
     );
     const metrics = performanceMetrics(result.trades, initialEquity);
     const outOfSampleMetrics = performanceMetrics(outOfSample.trades, initialEquity);
+    const forwardTestStatus = await new ForwardTestRepository().getStatus();
+    const forwardTestDays = forwardTestStatus?.qualified ? 14 : 0;
     const evidence = {
       backtestComplete: candles.length >= 500 && result.trades.length > 0,
       outOfSampleComplete: splits.outOfSample.length >= 100 && outOfSample.trades.length > 0,
       sensitivityChecked: sensitivity.every((item) => item.lookAheadSafe),
-      forwardTestDays: 0,
+      forwardTestDays,
+      forwardTestCoverageValid: forwardTestStatus?.qualified ?? false,
+      taxConfigVerified: forwardTestStatus?.taxVerified ?? false,
       maxDrawdownFraction: metrics.maxDrawdown,
       maxAllowedDrawdownFraction: 0.2,
     };
@@ -100,6 +105,7 @@ export async function GET(request: Request) {
       },
       sensitivity: sensitivity.map((item) => ({ trades: item.trades.length, equity: item.equity })),
       evidence,
+      forwardTest: forwardTestStatus,
       activation: gate,
     });
   } catch (error) {

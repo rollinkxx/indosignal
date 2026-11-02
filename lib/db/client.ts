@@ -11,7 +11,7 @@ export function getDbPool(): Pool {
     max: 4,
     idleTimeoutMillis: 30_000,
     connectionTimeoutMillis: 10_000,
-    ssl: { rejectUnauthorized: true },
+    ssl: process.env.DATABASE_SSL === 'disable' ? false : { rejectUnauthorized: true },
   });
   return pool;
 }

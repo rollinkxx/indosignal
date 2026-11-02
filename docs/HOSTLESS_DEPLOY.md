@@ -10,6 +10,10 @@
 
 The container runs `node scripts/migrate.mjs` before Next.js starts. This script applies the idempotent PostgreSQL schema and records its version in `schema_migrations`. It creates no account, strategy, market data, or trading order. If the database is unreachable or the schema fails, startup stops instead of serving a partially configured instance. The app must run as one replica until shared-worker coordination and database transaction behavior are verified.
 
+Migration `0004-forward-test` is additive and introduces durable forward-test evidence, cash ledger, and fill identifiers. After migration, the Node.js production instrumentation starts one paper-only worker. It uses a PostgreSQL session advisory lock so an overlapping process cannot run a second evaluator; the run cursor and all trade state remain in PostgreSQL across restarts. The worker evaluates only closed BTCIDR/1h candles received after its persisted `started_at`, polls at one-minute intervals, and invalidates the test on an unprovable data gap or late candle. The status endpoint is `/api/forward-test/status`.
+
+The worker creates a virtual IDR 10,000,000 account only for the paper campaign. It uses public Indodax REST data and never submits real orders. Tax is not verified in the current pair contract, so results are explicitly pre-tax and this blocks activation even after the 14-day coverage criterion passes. A successful deployment starts the clock; no implementation/build/test run can count as forward-test data.
+
 ## Environment
 
 Required: Hostless-managed `DATABASE_URL` (TLS enabled and certificate validation on). Optional: `INDODAX_WS_TOKEN`; the app must not be considered authenticated WebSocket-live without it. Do not store secrets in repository files. Public market REST reads do not need private Indodax trading credentials.
