@@ -9,10 +9,9 @@ import { getStrategy } from '@/lib/strategy/registry';
 import { atr, type IndicatorCandle } from '@/lib/strategy/indicators';
 import { regimeForStrategy } from '@/lib/strategy/evaluation';
 import { getDbPool } from '@/lib/db/client';
+import { candleObservationIssue, shouldStartForwardTestWorker } from './worker-guards';
 
 const POLL_INTERVAL_MS = 60_000;
-const MAX_CANDLE_LATENESS_MS = 15 * 60_000;
-const CANDLE_MS = 60 * 60_000;
 const LOCK_NAMESPACE = 1_401_102;
 const LOCK_ID = 14_337;
 const strategy = getStrategy('trend-following');
@@ -205,13 +204,14 @@ async function processCycle(lockClient: PoolClient): Promise<void> {
   const candles = await getHistoricalCandles(run.pairId, nowMs - 35 * 86_400_000, nowMs, run.timeframe);
   const sorted = [...candles].sort((a, b) => a.closeTimeMs - b.closeTimeMs);
   const candle = latestClosedCandle(sorted, nowMs);
-  if (!candle || candle.closeTimeMs <= run.lastProcessedCloseMs || candle.closeTimeMs <= run.startedAtMs) return;
-
-  if (nowMs - candle.closeTimeMs > MAX_CANDLE_LATENESS_MS) {
+  if (!candle) return;
+  const observationIssue = candleObservationIssue({ lastProcessedCloseMs: run.lastProcessedCloseMs, candleCloseMs: candle.closeTimeMs, runStartedAtMs: run.startedAtMs, nowMs });
+  if (observationIssue === 'historical_before_start' || observationIssue === 'duplicate_or_old') return;
+  if (observationIssue === 'candle_late') {
     await repository.invalidate(run.id, 'Candle tertutup terlambat diproses (>15 menit); forward coverage tidak dapat dianggap live.', nowMs, candle.closeTimeMs);
     return;
   }
-  if (run.lastProcessedCloseMs > 0 && candle.closeTimeMs - run.lastProcessedCloseMs > CANDLE_MS + 120_000) {
+  if (observationIssue === 'candle_gap') {
     await repository.invalidate(run.id, 'Gap candle 1 jam tidak dapat dipulihkan sebagai observasi live.', nowMs, candle.closeTimeMs);
     return;
   }
@@ -282,7 +282,7 @@ async function workerLoop(): Promise<void> {
 }
 
 export function startForwardTestWorker(): void {
-  if (started || process.env.NODE_ENV !== 'production' || !strategy) return;
+  if (started || !shouldStartForwardTestWorker(process.env.NEXT_RUNTIME, process.env.NODE_ENV, Boolean(strategy))) return;
   started = true;
   void workerLoop().catch((error) => {
     started = false;

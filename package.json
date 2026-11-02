@@ -2,19 +2,25 @@
   "name": "indosignal",
   "version": "0.1.0",
   "private": true,
-  "packageManager": "pnpm@10.12.1",
+  "packageManager": "pnpm@10.34.5",
   "scripts": {
     "dev": "next dev -H 0.0.0.0 -p 3000",
     "build": "next build",
     "start": "next start -H 0.0.0.0 -p ${PORT:-3000}",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
+    "benchmark:backtest": "node --expose-gc --import tsx scripts/benchmark-backtest.ts",
     "db:migrate": "node scripts/migrate.mjs",
     "db:restart-proof": "tsx scripts/db-restart-proof.ts",
     "db:forward-test-proof": "tsx scripts/forward-test-db-proof.ts",
     "db:multi-pair-proof": "tsx scripts/multi-pair-scan-db-proof.ts",
     "check:market-mocks": "node scripts/check-no-market-mocks.mjs",
-    "check:live": "node scripts/check-live-endpoints.mjs"
+    "check:live": "node scripts/check-live-endpoints.mjs",
+    "check:docker-security": "node scripts/check-docker-security.mjs",
+    "audit:chain": "node scripts/audit-chain.mjs verify",
+    "audit:db-integrity": "node scripts/db-integrity-audit.mjs",
+    "audit:snapshot": "node scripts/audit-chain.mjs snapshot",
+    "audit:snapshot:verify": "node scripts/audit-chain.mjs verify-snapshot"
   },
   "dependencies": {
     "decimal.js": "10.5.0",
@@ -22,7 +28,7 @@
     "pg": "8.23.1",
     "react": "19.3.1",
     "react-dom": "19.3.1",
-    "zod": "3.25.67"
+    "zod": "4.6.6"
   },
   "devDependencies": {
     "@types/node": "22.15.30",
@@ -31,6 +37,6 @@
     "@types/react-dom": "19.1.2",
     "tsx": "4.19.4",
     "typescript": "5.8.3",
-    "vitest": "3.2.4"
+    "vitest": "4.1.12"
   }
 }

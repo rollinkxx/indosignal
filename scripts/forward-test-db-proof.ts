@@ -31,6 +31,26 @@ function closePool(): Promise<void> {
   return getDbPool().end();
 }
 
+async function advisoryLockTakeoverProof(): Promise<void> {
+  const first = await getDbPool().connect();
+  const second = await getDbPool().connect();
+  try {
+    const acquired = await first.query<{ locked: boolean }>('SELECT pg_try_advisory_lock($1,$2) AS locked', [1_401_102, 14_337]);
+    assert.equal(acquired.rows[0]?.locked, true);
+    const blocked = await second.query<{ locked: boolean }>('SELECT pg_try_advisory_lock($1,$2) AS locked', [1_401_102, 14_337]);
+    assert.equal(blocked.rows[0]?.locked, false);
+    const independentScanner = await second.query<{ locked: boolean }>('SELECT pg_try_advisory_lock($1,$2) AS locked', [1_401_102, 14_338]);
+    assert.equal(independentScanner.rows[0]?.locked, true);
+    first.release(true); // destroying the owning DB session simulates process/container death
+    const takeover = await second.query<{ locked: boolean }>('SELECT pg_try_advisory_lock($1,$2) AS locked', [1_401_102, 14_337]);
+    assert.equal(takeover.rows[0]?.locked, true);
+    await second.query('SELECT pg_advisory_unlock($1,$2)', [1_401_102, 14_337]);
+    await second.query('SELECT pg_advisory_unlock($1,$2)', [1_401_102, 14_338]);
+  } finally {
+    second.release();
+  }
+}
+
 function runProcess(args: string[], env: NodeJS.ProcessEnv): void {
   const result = spawnSync(process.execPath, args, { cwd: process.cwd(), env, encoding: 'utf8', stdio: 'inherit' });
   if (result.error) throw result.error;
@@ -127,6 +147,11 @@ async function verifyAfterRestart(): Promise<void> {
     [run.id, run.accountId],
   );
   assert.deepEqual(counts.rows[0], { candles: 1, decisions: 1, orders: 2, fills: 2, ledger: 3, trades: 1 });
+  const chain = await getDbPool().query(`SELECT count(*)::int AS chain_entries, min(sequence)::int AS first_sequence, max(sequence)::int AS last_sequence FROM forward_test_event_chain WHERE run_id=$1`, [run.id]);
+  const eventCount = await getDbPool().query('SELECT count(*)::int AS events FROM forward_test_events WHERE run_id=$1', [run.id]);
+  assert.equal(chain.rows[0].chain_entries, eventCount.rows[0].events);
+  assert.equal(chain.rows[0].first_sequence, 1);
+  assert.equal(chain.rows[0].last_sequence, chain.rows[0].chain_entries);
 
   let appendOnlyRejected = false;
   try {
@@ -135,7 +160,14 @@ async function verifyAfterRestart(): Promise<void> {
     appendOnlyRejected = true;
   }
   assert.equal(appendOnlyRejected, true);
-  console.log('restart verify PASS', JSON.stringify({ runId: run.id, accountId: run.accountId, cash: finalPortfolio.cash, counts: counts.rows[0], duplicateDecisionIgnored: true, duplicateStopIgnored: true, appendOnlyRejected }));
+  let chainMutationRejected = false;
+  try { await getDbPool().query("UPDATE forward_test_event_chain SET event_hash=repeat('0',64) WHERE run_id=$1", [run.id]); } catch { chainMutationRejected = true; }
+  assert.equal(chainMutationRejected, true);
+  let truncateRejected = false;
+  try { await getDbPool().query('TRUNCATE forward_test_event_chain'); } catch { truncateRejected = true; }
+  assert.equal(truncateRejected, true);
+  await advisoryLockTakeoverProof();
+  console.log('restart verify PASS', JSON.stringify({ runId: run.id, accountId: run.accountId, cash: finalPortfolio.cash, counts: counts.rows[0], chainEntries: chain.rows[0].chain_entries, duplicateDecisionIgnored: true, duplicateStopIgnored: true, appendOnlyRejected, chainMutationRejected, truncateRejected, advisoryLockTakeover: true }));
   await closePool();
 }
 
