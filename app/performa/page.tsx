@@ -68,8 +68,9 @@ export default async function PerformancePage() {
         ) : (
           <p className="muted">{error}</p>
         )}
-        <p>Paper trading otomatis tetap nonaktif hingga forward-test minimal 14 hari, pencatatan decision/fill restart-safe, dan pemeriksaan sensitivitas selesai.</p>
-        <p><a href="/api/backtest?strategy=trend-following&pair=btcidr&days=90&tf=60">Lihat laporan JSON backtest</a> · <a href="/api/signals?strategy=trend-following&pair=btcidr&tf=60">Lihat sinyal terbaru</a> · <a href="/api/forward-test/status">Status forward-test 14 hari</a></p>
+        <p>Forward-test paper BTCIDR berjalan terpisah. Scanner multi-pair mengamati maksimum 20 pair IDR paling likuid yang lolos filter volume, spread, fee, dan warm-up; scanner hanya menyimpan sinyal, tidak membuat order atau posisi.</p>
+        <p>Aktivasi strategi dan order riil tetap nonaktif hingga syarat forward-test, pencatatan restart-safe, sensitivitas, fee/pajak, dan review manual terpenuhi.</p>
+        <p><a href="/api/backtest?strategy=trend-following&pair=btcidr&days=90&tf=60">Lihat laporan JSON backtest</a> · <a href="/api/signals?strategy=trend-following&pair=btcidr&tf=60">Lihat sinyal BTC terbaru</a> · <a href="/api/forward-test/status">Status forward-test BTC 14 hari</a> · <a href="/api/forward-test/multi-pair/status">Status scanner multi-pair</a></p>
       </section>
     </div>
   );
