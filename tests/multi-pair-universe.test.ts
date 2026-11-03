@@ -54,4 +54,9 @@ describe('multi-pair universe selection', () => {
     expect(selected).toHaveLength(1);
     expect(selected[0].takerFeePercent).toBe('0');
   });
+
+  it('rejects market timestamps too far in the future', () => {
+    const selected = selectMultiPairUniverse([market('btcidr', { updatedAtMs: now + 30_001 })], [pair('btcidr')], now);
+    expect(selected).toHaveLength(0);
+  });
 });

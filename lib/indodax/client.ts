@@ -89,6 +89,8 @@ export function resetIndodaxCaches(): void { requestStats.clear(); resetCache();
 async function getPairs() { return cached('pairs', PAIRS_TTL_MS, () => requestJson('/api/pairs', pairsSchema)); }
 async function getSummaries() { return cached('summaries', SUMMARIES_TTL_MS, () => requestJson('/api/summaries', summariesSchema)); }
 
+export async function getPairsMetadata() { return getPairs(); }
+
 export async function getMarketOverview(): Promise<{ markets: MarketSnapshot[]; updatedAtMs: number }> {
   const [summaries, pairs] = await Promise.all([getSummaries(), getPairs()]);
   const markets = Object.entries(summaries.tickers)
@@ -138,7 +140,7 @@ export function normalizeHistoryRows(rows: HistoryCandle[], pairId: string, time
     seen.add(candle.openTimeMs);
     const open = Number(candle.open), high = Number(candle.high), low = Number(candle.low), close = Number(candle.close), volume = Number(candle.volume);
     if (![open, high, low, close, volume].every(Number.isFinite) || low <= 0 || volume < 0 || high < Math.max(open, close) || low > Math.min(open, close)) throw new Error('Data historis mengandung OHLCV yang tidak konsisten.');
-    if (index > 0 && candle.openTimeMs - candles[index - 1].openTimeMs > intervalMs * 3) throw new Error('Data historis memiliki gap lebih dari tiga timeframe; pemrosesan ditahan.');
+    if (index > 0 && candle.openTimeMs - candles[index - 1].openTimeMs > intervalMs + 1_000) throw new Error('Data historis memiliki gap candle; pemrosesan ditahan agar durasi bar tetap valid.');
   }
   if (candles.length === 0) throw new Error('Tidak ditemukan candle historis tertutup pada rentang yang diminta.');
   return candles;

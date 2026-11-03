@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { activationGate, evaluateStrategySeries, getStrategy } from '../lib/strategy/registry';
 import { walkForwardSplits } from '../lib/strategy/backtest';
-import { inferRegimeSeries } from '../lib/strategy/evaluation';
+import { closedCandlesThrough, inferRegimeSeries } from '../lib/strategy/evaluation';
 import type { IndicatorCandle } from '../lib/strategy/indicators';
+import type { ClosedCandle } from '../lib/paper/types';
 
 describe('strategy registry', () => {
   it('menahan strategi sampai semua evidence tersedia', () => { const result = activationGate({ backtestComplete: true, outOfSampleComplete: true, sensitivityChecked: true, forwardTestDays: 13, maxDrawdownFraction: 0.1, maxAllowedDrawdownFraction: 0.2 }); expect(result.active).toBe(false); expect(result.reasons).toContain('forward_test_14_days_required'); });
@@ -24,6 +25,17 @@ describe('strategy registry', () => {
         expect(signals[index]).toEqual(strategy.evaluate({ candles: prefix, regime: inferRegimeSeries(prefix).at(-1) ?? 'range' }));
       }
     }
+  });
+  it('membatasi regime pada candle yang sudah ditutup saat keputusan dibuat', () => {
+    const closed: ClosedCandle[] = Array.from({ length: 2 }, (_, index) => ({
+      pairId: 'btcidr', timeframe: '60', openTimeMs: index * 3_600_000, closeTimeMs: (index + 1) * 3_600_000,
+      open: '100', high: '105', low: '95', close: '101', volume: '10', source: 'history_v2',
+    }));
+    const future: ClosedCandle = {
+      pairId: 'btcidr', timeframe: '60', openTimeMs: 7_200_000, closeTimeMs: 10_800_000,
+      open: '100', high: '100000', low: '1', close: '50000', volume: '1000000', source: 'history_v2',
+    };
+    expect(closedCandlesThrough([...closed, future], closed[1].closeTimeMs)).toEqual(closed);
   });
   it('membutuhkan kuantitatif OOS dan sensitivitas untuk melewati activation gate', () => {
     const gate = activationGate({ backtestComplete: true, outOfSampleComplete: true, sensitivityChecked: true, sensitivityScenarioCount: 8, sensitivityMetricsValid: true, sensitivityWorstDrawdownFraction: 0.1, outOfSampleTradeCount: 40, outOfSampleExpectancyR: 0.2, outOfSampleProfitFactor: 1.2, forwardTestDays: 14, forwardTestCoverageValid: true, taxConfigVerified: true, maxDrawdownFraction: 0.1, maxAllowedDrawdownFraction: 0.2 });

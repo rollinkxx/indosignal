@@ -7,7 +7,7 @@ import type { ClosedCandle, FeeConfig, Fill, ValidatedOrderBook } from '@/lib/pa
 import { ForwardTestRepository, type ForwardTestConfig, type ForwardTestRun } from './repository';
 import { getStrategy } from '@/lib/strategy/registry';
 import { atr, type IndicatorCandle } from '@/lib/strategy/indicators';
-import { regimeForStrategy } from '@/lib/strategy/evaluation';
+import { closedCandlesThrough, regimeForStrategy } from '@/lib/strategy/evaluation';
 import { getDbPool } from '@/lib/db/client';
 import { candleObservationIssue, shouldStartForwardTestWorker } from './worker-guards';
 
@@ -216,7 +216,7 @@ async function processCycle(lockClient: PoolClient): Promise<void> {
     return;
   }
 
-  const history = sorted.filter((item) => item.closeTimeMs <= candle.closeTimeMs);
+  const history = closedCandlesThrough(sorted, candle.closeTimeMs);
   if (history.length < 200) {
     await repository.recordWorkerError(run.id, 'Warm-up candle belum mencapai 200 bar; keputusan belum diproses.', nowMs);
     return;

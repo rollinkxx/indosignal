@@ -5,6 +5,10 @@ const asIndicator = (candle: ClosedCandle): IndicatorCandle => ({
   high: Number(candle.high), low: Number(candle.low), close: Number(candle.close), volume: Number(candle.volume),
 });
 
+export function closedCandlesThrough(candles: ClosedCandle[], closeTimeMs: number): ClosedCandle[] {
+  return candles.filter((candle) => candle.closeTimeMs <= closeTimeMs);
+}
+
 function classify(adxValue: number | undefined, atrValue: number | undefined, close: number | undefined): 'trend' | 'range' | 'volatile' {
   if (adxValue === undefined || atrValue === undefined || !close || !Number.isFinite(close)) return 'range';
   if (atrValue / close >= 0.05) return 'volatile';

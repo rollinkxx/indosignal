@@ -21,6 +21,8 @@ export type MarketSnapshot = {
   error?: string;
 };
 
+const MAX_MARKET_CLOCK_SKEW_MS = 30_000;
+
 export function toEpochMs(value: string | number): number {
   const n = typeof value === 'number' ? value : Number(value);
   if (!Number.isFinite(n)) throw new Error('timestamp tidak valid');
@@ -35,7 +37,7 @@ export function toDecimalString(value: string | number): string {
 
 export function tickerToSnapshot(pair: Pair, tickerId: string, ticker: Ticker, nowMs = Date.now()): MarketSnapshot {
   const updatedAtMs = toEpochMs(ticker.server_time);
-  const ageMs = Math.max(0, nowMs - updatedAtMs);
+  const ageMs = nowMs - updatedAtMs;
   return {
     pairId: pair.id,
     tickerId,
@@ -47,7 +49,7 @@ export function tickerToSnapshot(pair: Pair, tickerId: string, ticker: Ticker, n
     pricePrecision: pair.price_precision === undefined ? undefined : toDecimalString(pair.price_precision),
     makerFeeRate: pair.trade_fee_percent_maker === undefined ? undefined : toDecimalString(pair.trade_fee_percent_maker),
     takerFeeRate: pair.trade_fee_percent_taker === undefined ? undefined : toDecimalString(pair.trade_fee_percent_taker),
-    updatedAtMs, source: 'rest', status: ageMs > 30_000 ? 'stale' : 'live',
+    updatedAtMs, source: 'rest', status: Math.abs(ageMs) > MAX_MARKET_CLOCK_SKEW_MS ? 'stale' : 'live',
   };
 }
 

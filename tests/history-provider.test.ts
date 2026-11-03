@@ -49,7 +49,9 @@ describe('Indodax history upstream failures', () => {
     expect(candles[0].closeTimeMs).toBe(baseMs + 3_600_000);
   });
 
-  it('rejects gaps over three intervals and disallowed timeframe/range', () => {
+  it('rejects missing candle intervals and disallowed timeframe/range', () => {
+    const oneMissing = historySchema.parse([row(baseMs / 1000), row((baseMs + 2 * 3_600_000) / 1000)]);
+    expect(() => normalizeHistoryRows(oneMissing, 'btcidr', '60', baseMs, baseMs + 3 * 3_600_000, baseMs + 3 * 3_600_000)).toThrow(/gap candle/);
     const rows = historySchema.parse([row(baseMs / 1000), row((baseMs + 4 * 3_600_000) / 1000)]);
     expect(() => normalizeHistoryRows(rows, 'btcidr', '60', baseMs, baseMs + 5 * 3_600_000, baseMs + 5 * 3_600_000)).toThrow(/gap/);
     expect(() => normalizeHistoryRows(rows, 'btcidr', '5', baseMs, baseMs + 5 * 3_600_000, baseMs + 5 * 3_600_000)).toThrow(/Timeframe/);
