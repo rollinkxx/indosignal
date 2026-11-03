@@ -1,11 +1,15 @@
 import pg from 'pg';
+import { summarizeIntegrity } from '../lib/audit/integrity.mjs';
 const { Client } = pg;
 const connectionString = process.env.AUDIT_DATABASE_URL ?? process.env.DATABASE_URL;
-if (!connectionString) throw new Error('AUDIT_DATABASE_URL atau DATABASE_URL wajib tersedia.');
+if (!connectionString) {
+  console.error(JSON.stringify({ ok: false, status: 'database_unavailable', error: 'AUDIT_DATABASE_URL atau DATABASE_URL wajib tersedia.' }));
+  process.exit(2);
+}
 const ssl = process.env.AUDIT_DATABASE_SSL ?? process.env.DATABASE_SSL;
 const client = new Client({ connectionString, ssl: ssl === 'disable' ? false : { rejectUnauthorized: true }, connectionTimeoutMillis: 10_000 });
-await client.connect();
 try {
+  await client.connect();
   await client.query('BEGIN READ ONLY');
   const unvalidated = await client.query(`SELECT conrelid::regclass::text AS table_name, conname, contype FROM pg_constraint WHERE NOT convalidated ORDER BY table_name, conname`);
   const orphanChecks = await client.query(`
@@ -18,15 +22,23 @@ try {
     UNION ALL SELECT 'forward_event_chain.orphan', count(*)::bigint FROM forward_test_event_chain c LEFT JOIN forward_test_events e ON e.id=c.event_id WHERE e.id IS NULL
   `);
   const ledger = await client.query(`WITH replay AS (
-    SELECT account_id, balance_after,
-      sum(delta_cash) OVER (PARTITION BY account_id ORDER BY created_at, id ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS expected
+    SELECT account_id, balance_after, sum(delta_cash) OVER (PARTITION BY account_id ORDER BY created_at, id ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS expected
     FROM paper_cash_ledger
   ) SELECT count(*)::bigint AS rows_checked, count(*) FILTER (WHERE abs(balance_after-expected)>0.000000000001)::bigint AS mismatches FROM replay`);
-  const duplicateIdempotency = await client.query(`SELECT 'forward_test_events' AS table_name, count(*)::bigint AS duplicate_groups FROM (SELECT run_id,idempotency_key FROM forward_test_events GROUP BY 1,2 HAVING count(*)>1) q UNION ALL SELECT 'paper_cash_ledger',count(*)::bigint FROM (SELECT run_id,idempotency_key FROM paper_cash_ledger GROUP BY 1,2 HAVING count(*)>1) q`);
-  const report = { ok: orphanChecks.rows.every((row) => Number(row.count) === 0) && Number(ledger.rows[0].mismatches) === 0, unvalidatedConstraints: unvalidated.rows, orphanChecks: orphanChecks.rows, ledger: ledger.rows[0], duplicateIdempotency: duplicateIdempotency.rows };
+  const duplicateIdempotency = await client.query(`
+    SELECT 'forward_test_events' AS table_name, count(*)::bigint AS duplicate_groups FROM (SELECT run_id,idempotency_key FROM forward_test_events GROUP BY 1,2 HAVING count(*)>1) q
+    UNION ALL SELECT 'paper_cash_ledger', count(*)::bigint FROM (SELECT run_id,idempotency_key FROM paper_cash_ledger GROUP BY 1,2 HAVING count(*)>1) q`);
+  const chain = await client.query(`SELECT
+    (SELECT count(*) FROM forward_test_events e LEFT JOIN forward_test_event_chain c ON c.event_id=e.id WHERE c.event_id IS NULL)::bigint AS missing,
+    (SELECT count(*) FROM forward_test_event_chain c LEFT JOIN forward_test_events e ON e.id=c.event_id WHERE e.id IS NULL)::bigint AS orphan`);
+  const summary = summarizeIntegrity({ unvalidatedConstraints: unvalidated.rows, orphanChecks: orphanChecks.rows, ledger: ledger.rows[0], duplicateIdempotency: duplicateIdempotency.rows, chain: chain.rows[0] });
+  const report = { ...summary, status: summary.ok ? 'passed' : 'failed', unvalidatedConstraints: unvalidated.rows, orphanChecks: orphanChecks.rows, ledger: ledger.rows[0], duplicateIdempotency: duplicateIdempotency.rows, chain: chain.rows[0] };
   console.log(JSON.stringify(report, null, 2));
-  if (!report.ok) process.exitCode = 1;
+  process.exitCode = report.ok ? 0 : 1;
+} catch (error) {
+  console.error(JSON.stringify({ ok: false, status: 'database_unavailable', error: error instanceof Error ? error.message : String(error) }));
+  process.exitCode = 2;
 } finally {
   await client.query('ROLLBACK').catch(() => undefined);
-  await client.end();
+  await client.end().catch(() => undefined);
 }

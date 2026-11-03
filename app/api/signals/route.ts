@@ -35,7 +35,7 @@ export async function GET(request: Request) {
       if (candles.length > maximumCandles) throw new Error('HISTORY_LIMIT');
       const candle = latestClosedCandle(candles, nowMs);
       if (!candle) return { ok: true, signal: null, reason: 'Belum ada candle tertutup yang valid.' };
-      const regime = regimeForStrategy(strategy, candles);
+      const regime = regimeForStrategy(candles);
       const evaluated = strategy.evaluate({ regime, candles: candles.map((item) => ({ high: Number(item.high), low: Number(item.low), close: Number(item.close), volume: Number(item.volume) })) });
       const decision = decisionRecord(strategy.slug, pair, candle, evaluated.action, evaluated.reason, nowMs);
       return { ok: true, signal: decision, regime, candle: { closeTimeMs: candle.closeTimeMs, close: candle.close, source: candle.source }, activation: { active: false, reason: 'Forward-test paper 14 hari dan quantitative sensitivity gate belum terpenuhi.' } };

@@ -69,7 +69,16 @@ async function verify() {
       `SELECT
          (SELECT count(*)::bigint FROM forward_test_events e LEFT JOIN paper_orders o ON o.id::text=e.payload_json->>'orderId' WHERE e.event_kind='order_created' AND o.id IS NULL) AS missing_orders,
          (SELECT count(*)::bigint FROM forward_test_events e LEFT JOIN paper_fills f ON f.id::text=e.payload_json->>'fillId' WHERE e.event_kind='fill' AND f.id IS NULL) AS missing_event_fills,
-         (SELECT count(*)::bigint FROM forward_test_events e LEFT JOIN paper_cash_ledger l ON l.source_payload->>'fillId'=e.payload_json->>'fillId' AND l.run_id=e.run_id WHERE e.event_kind='fill' AND e.payload_json->>'fillId' IN (SELECT source_payload->>'fillId' FROM paper_cash_ledger WHERE event_kind IN ('buy_fill','sell_fill')) AND l.id IS NULL) AS missing_ledger_links,
+         (SELECT count(*)::bigint
+            FROM forward_test_events e
+            LEFT JOIN paper_cash_ledger l
+              ON l.source_payload->>'fillId'=NULLIF(e.payload_json->>'fillId','')
+             AND l.run_id=e.run_id
+             AND l.event_kind IN ('buy_fill','sell_fill')
+           WHERE e.event_kind='fill'
+             AND (NULLIF(e.payload_json->>'fillId','') IS NULL OR l.id IS NULL
+               OR (e.payload_json->>'side'='buy' AND l.event_kind <> 'buy_fill')
+               OR (e.payload_json->>'side'='sell' AND l.event_kind <> 'sell_fill'))) AS missing_ledger_links,
          (SELECT count(*)::bigint FROM closed_trades t LEFT JOIN paper_fills f ON f.id=t.entry_fill_id WHERE f.id IS NULL) +
          (SELECT count(*)::bigint FROM closed_trades t LEFT JOIN paper_fills f ON f.id=t.exit_fill_id WHERE f.id IS NULL) AS missing_closed_trade_fills`,
     );

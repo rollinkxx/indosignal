@@ -4,7 +4,7 @@
 
 - PostgreSQL 17 managed database: `indosignal-db`, 0.25 vCPU, 512 MiB RAM, 512 MiB storage.
 - App: Dockerfile build, satu replica, port `3000`, health probe `GET /api/ready`.
-- Database is linked to the app so Hostless injects `DATABASE_URL`; do not copy that secret to Git, chat, build logs, or browser-visible code.
+- Database secrets are linked separately: `DATABASE_URL` is the non-superuser runtime role and `MIGRATION_DATABASE_URL` is the DDL-capable migrator role. Never copy either secret to Git, chat, build logs, or browser-visible code.
 
 ## Migrations and startup
 
@@ -16,7 +16,7 @@ The worker creates a virtual IDR 10,000,000 account only for the paper campaign.
 
 ## Environment
 
-Required: Hostless-managed `DATABASE_URL` (TLS enabled and certificate validation on). Optional: `INDODAX_WS_TOKEN`; the app must not be considered authenticated WebSocket-live without it. Do not store secrets in repository files. Public market REST reads do not need private Indodax trading credentials.
+Required in production: Hostless-managed `DATABASE_URL` and `MIGRATION_DATABASE_URL`, each with TLS enabled and certificate validation on. `DATABASE_URL` must use a non-superuser role; `MIGRATION_DATABASE_URL` is used only by the startup migrator and is not inherited by Next.js. Optional: `INDODAX_WS_TOKEN`; the app must not be considered authenticated WebSocket-live without it. Do not store secrets in repository files. Public market REST reads do not need private Indodax trading credentials.
 
 ## Release verification
 

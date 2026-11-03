@@ -22,9 +22,6 @@ export function inferRegime(candles: ClosedCandle[]): 'trend' | 'range' | 'volat
   return inferRegimeSeries(values).at(-1) ?? 'range';
 }
 
-export function regimeForStrategy(strategy: { slug: string }, candles: ClosedCandle[]) {
-  const inferred = inferRegime(candles);
-  if (inferred === 'volatile') return inferred;
-  if (strategy.slug === 'mean-reversion') return 'range' as const;
-  return inferred;
+export function regimeForStrategy(candles: ClosedCandle[]) {
+  return inferRegime(candles);
 }

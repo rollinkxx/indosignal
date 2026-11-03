@@ -7,7 +7,7 @@ Komponen domain paper-trading sudah tersedia sebagai fungsi deterministik yang t
 - `lib/paper/metrics.ts` menghitung sample count, Wilson CI, winrate, profit factor, expectancy R, average win/loss, drawdown, Sharpe, Sortino, dan equity curve.
 - `lib/paper/signals.ts` menolak candle yang belum closed dan membuat idempotency key dari strategy/pair/candle close.
 - `lib/paper/journal.ts` menjaga append-only event berdasarkan idempotency key.
-- `db/schema.sql` menyediakan tabel additive untuk account, strategy, candle, order, fill, decision log, dan fee config. `pnpm db:migrate` harus dijalankan eksplisit dengan `DATABASE_URL`; tidak ada seed default.
+- `db/schema.sql` menyediakan tabel additive untuk account, strategy, candle, order, fill, decision log, dan fee config. `pnpm db:migrate` harus dijalankan dengan `MIGRATION_DATABASE_URL` terpisah di production; tidak ada seed default.
 
 ## Batas aktivasi
 

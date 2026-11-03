@@ -4,14 +4,14 @@ PWA berbahasa Indonesia untuk memantau data pasar publik Indodax. Aplikasi mengg
 
 ## Menjalankan lokal
 
-Gunakan Node.js 22 dan pnpm 10.12.1:
+Gunakan Node.js 22 dan pnpm 10.34.5:
 
 ```sh
 corepack pnpm install --frozen-lockfile
 corepack pnpm dev
 ```
 
-Untuk persistence lokal, salin `.env.example` menjadi `.env.local`, isi `DATABASE_URL` PostgreSQL yang aman, lalu jalankan `corepack pnpm db:migrate`. Jangan masukkan koneksi database atau token ke Git.
+Untuk persistence lokal, salin `.env.example` menjadi `.env.local`, isi `DATABASE_URL` runtime dan `MIGRATION_DATABASE_URL` migrator secara terpisah, lalu jalankan `corepack pnpm db:migrate`. Fallback lokal ke `DATABASE_URL` hanya boleh diaktifkan eksplisit dengan `ALLOW_RUNTIME_DATABASE_MIGRATION=true`; jangan pernah mengaktifkannya di production. Jangan masukkan koneksi database atau token ke Git.
 
 ## Pemeriksaan
 
@@ -24,6 +24,6 @@ corepack pnpm build
 
 ## Hostless
 
-Gunakan Dockerfile dan managed PostgreSQL. `DATABASE_URL` harus dipasang sebagai secret yang ter-link ke app; migrasi skema idempoten berjalan saat container start. Baca [runbook Hostless](docs/HOSTLESS_DEPLOY.md) sebelum merilis. Pertahankan satu replica hingga koordinasi worker lintas instance divalidasi.
+Gunakan Dockerfile dan managed PostgreSQL. Production wajib memasang dua secret terpisah: `DATABASE_URL` untuk role runtime non-superuser dan `MIGRATION_DATABASE_URL` untuk role migrator berhak DDL. Migrasi skema idempoten berjalan sebelum Next.js start dan variabel migrator dihapus sebelum proses aplikasi dimulai. Baca [runbook Hostless](docs/HOSTLESS_DEPLOY.md) sebelum merilis. Pertahankan satu replica hingga koordinasi worker lintas instance divalidasi.
 
 Public REST market data tidak memerlukan private trading key. `INDODAX_WS_TOKEN` hanya opsional untuk stream terautentikasi. Strategi otomatis dan order riil tetap nonaktif; jangan aktifkan tanpa seluruh gate biaya, pajak, risiko, dan forward-test.

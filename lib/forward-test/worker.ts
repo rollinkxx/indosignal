@@ -146,7 +146,7 @@ async function makeSignalFill(
   const currentIndicators = indicatorCandles(history);
   const atrValue = atr(currentIndicators).at(-1);
   if (atrValue === undefined || !Number.isFinite(atrValue) || atrValue <= 0) return { riskBlock: 'atr_unavailable' };
-  const signal = strategy?.evaluate({ candles: currentIndicators, regime: regimeForStrategy(strategy, history) });
+  const signal = strategy?.evaluate({ candles: currentIndicators, regime: regimeForStrategy(history) });
   const multiple = signal?.stopAtr ?? 2;
   const stop = entry.sub(D(atrValue).mul(multiple));
   if (stop.lte(0)) return { riskBlock: 'invalid_atr_stop' };
@@ -225,7 +225,7 @@ async function processCycle(lockClient: PoolClient): Promise<void> {
     await repository.invalidate(run.id, 'Strategi trend-following tidak terdaftar.', nowMs, candle.closeTimeMs);
     return;
   }
-  const regime = regimeForStrategy(strategy, history);
+  const regime = regimeForStrategy(history);
   const indicators = indicatorCandles(history);
   const signal = strategy.evaluate({ candles: indicators, regime });
   const decision = decisionRecord(strategy.slug, run.pairId, candle, signal.action, signal.reason, nowMs);
