@@ -1,9 +1,16 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { acquireApiRequest, apiLimitMemoryStats, resetApiLimitsForTest } from '../lib/server/rate-limit';
+import { redactOperationalError } from '../lib/server/public-status';
 
 afterEach(() => { resetApiLimitsForTest(); vi.unstubAllEnvs(); });
 
 describe('API abuse controls', () => {
+  it('redacts internal worker error details from public status payloads', () => {
+    const result = redactOperationalError({ status: 'running', lastError: 'password authentication failed for role runtime' });
+    expect(result.lastError).toBe('Worker mengalami error; detail teknis tersedia di log operasional.');
+    expect(JSON.stringify(result)).not.toContain('password authentication failed');
+  });
+
   it('does not trust spoofed X-Forwarded-For by default', async () => {
     vi.stubEnv('NODE_ENV', 'test');
     vi.stubEnv('DATABASE_URL', '');

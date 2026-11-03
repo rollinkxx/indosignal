@@ -100,6 +100,17 @@ describe('historical backtest', () => {
     expect(JSON.stringify(metrics)).not.toContain('Infinity');
   });
 
+  it('captures drawdown inside a trade even when closed-trade equity recovers', () => {
+    const metrics = performanceMetrics([
+      { pnlQuote: '100', pnlR: '1', equityAfter: '10100', closedAtMs: start + 7_200_000 },
+    ], '10000', [
+      { timeMs: start, value: '10000' },
+      { timeMs: start + 3_600_000, value: '7000' },
+      { timeMs: start + 7_200_000, value: '10100' },
+    ]);
+    expect(metrics.maxDrawdown).toBeCloseTo(0.3);
+  });
+
   it('reports actual position exposure fraction from entry and close timestamps', () => {
     const metrics = performanceMetrics([{ pnlQuote: '10', pnlR: '1', equityAfter: '10010', openedAtMs: start, closedAtMs: start + 3_600_000 }], '10000', [
       { timeMs: start, value: '10000' }, { timeMs: start + 7_200_000, value: '10010' },

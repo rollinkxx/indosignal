@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { depthSchema, pairsSchema, serverTimeSchema, summariesSchema, tickerAllSchema, tradesSchema } from '../lib/indodax/schemas';
-import { toEpochMs } from '../lib/indodax/normalize';
+import { tickerToSnapshot, toEpochMs } from '../lib/indodax/normalize';
 
 function sample(name: string): unknown { return JSON.parse(readFileSync(resolve(process.cwd(), 'docs/api-samples', name), 'utf8')); }
 
@@ -19,4 +19,10 @@ describe('kontrak respons live Indodax', () => {
 
 describe('normalisasi timestamp defensif', () => {
   it('membedakan detik dan milidetik', () => { expect(toEpochMs(1793457008)).toBe(1793457008000); expect(toEpochMs(1793456979727)).toBe(1793456979727); });
+  it('menandai ticker dengan timestamp jauh di masa depan sebagai stale', () => {
+    const pairs = pairsSchema.parse(sample('pairs.json'));
+    const pair = pairs.find((candidate) => candidate.id === 'btcidr')!;
+    const ticker = summariesSchema.parse(sample('summaries.json')).tickers[pair.ticker_id];
+    expect(tickerToSnapshot(pair, pair.ticker_id, ticker, Number(ticker.server_time) * 1000 - 60_000).status).toBe('stale');
+  });
 });

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { MultiPairScanRepository } from '@/lib/forward-test/multi-pair-repository';
 import { acquireApiRequest } from '@/lib/server/rate-limit';
+import { redactOperationalError } from '@/lib/server/public-status';
 
 export const dynamic = 'force-dynamic';
 
@@ -11,7 +12,7 @@ export async function GET(request: Request) {
   if (!guard.allowed) return NextResponse.json({ ok: false, error: 'Batas request terlampaui.' }, { status: 429, headers: { 'Cache-Control': 'no-store', 'Retry-After': String(guard.retryAfterSeconds) } });
   try {
     const status = await new MultiPairScanRepository().getStatus();
-    return NextResponse.json({ ok: true, multiPairScan: status ?? { status: 'not_started', scanOnly: true, paperOrdersCreated: false } }, { status: 200, headers: { 'Cache-Control': 'no-store' } });
+    return NextResponse.json({ ok: true, multiPairScan: status ? redactOperationalError(status) : { status: 'not_started', scanOnly: true, paperOrdersCreated: false } }, { status: 200, headers: { 'Cache-Control': 'no-store' } });
   } catch {
     return NextResponse.json({ ok: false, error: 'Status scanner multi-pair belum tersedia.' }, { status: 503, headers: { 'Cache-Control': 'no-store' } });
   } finally { await guard.release().catch(() => undefined); }

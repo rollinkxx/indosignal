@@ -38,7 +38,7 @@ export default async function PerformancePage() {
       effectiveFrom: new Date().toISOString(),
     };
     const result = runBacktest(candles, strategy, { initialEquity: INITIAL_EQUITY, fee, riskFraction: '0.01' });
-    const metrics = performanceMetrics(result.trades, INITIAL_EQUITY);
+    const metrics = performanceMetrics(result.trades, INITIAL_EQUITY, result.equityCurve);
     const initial = Number(INITIAL_EQUITY);
     const final = Number(result.equity);
     report = {

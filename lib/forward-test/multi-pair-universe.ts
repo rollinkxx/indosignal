@@ -32,7 +32,7 @@ export function selectMultiPairUniverse(
   for (const market of markets) {
     const pair = pairById.get(market.pairId.toLowerCase());
     if (!pair || !pair.id.toLowerCase().endsWith('idr') || pair.base_currency.toLowerCase() !== 'idr') continue;
-    if (market.status !== 'live' || nowMs - market.updatedAtMs > 30_000) continue;
+    if (market.status !== 'live' || nowMs - market.updatedAtMs > 30_000 || market.updatedAtMs - nowMs > 30_000) continue;
     if (flagIsOn(pair.is_maintenance) || flagIsOn(pair.is_market_suspended)) continue;
     const volume = finitePositive(market.volumeIdr24h);
     if (volume === null || volume < Number(MULTI_PAIR_MIN_VOLUME_IDR)) continue;

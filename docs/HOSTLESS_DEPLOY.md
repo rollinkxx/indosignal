@@ -18,6 +18,10 @@ The worker creates a virtual IDR 10,000,000 account only for the paper campaign.
 
 Required in production: Hostless-managed `DATABASE_URL` and `MIGRATION_DATABASE_URL`, each with TLS enabled and certificate validation on. `DATABASE_URL` must use a non-superuser role; `MIGRATION_DATABASE_URL` is used only by the startup migrator and is not inherited by Next.js. Optional: `INDODAX_WS_TOKEN`; the app must not be considered authenticated WebSocket-live without it. Do not store secrets in repository files. Public market REST reads do not need private Indodax trading credentials.
 
+### Troubleshooting `Crashed On Start`
+
+If the container log says `MIGRATION_DATABASE_URL wajib tersedia di production`, configure that secret in the Hostless app environment using the separate DDL-capable migration role. Do not copy `DATABASE_URL` into this variable or restore production fallback: `DATABASE_URL` is the least-privilege runtime role. This guard exits before opening a database connection, so no migration is applied by that failed start. After linking the migration secret with TLS/certificate validation, redeploy and inspect migration logs before checking `/api/ready`.
+
 ## Release verification
 
 1. Confirm the managed database is healthy and linked to the app.

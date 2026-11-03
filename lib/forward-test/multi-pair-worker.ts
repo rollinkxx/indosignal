@@ -1,12 +1,11 @@
 import type { PoolClient } from 'pg';
 import { getDbPool } from '@/lib/db/client';
-import { getMarketOverview, getPairById, getHistoricalCandles } from '@/lib/indodax/client';
-import type { Pair } from '@/lib/indodax/schemas';
+import { getMarketOverview, getPairsMetadata, getHistoricalCandles } from '@/lib/indodax/client';
 import type { MarketSnapshot } from '@/lib/indodax/normalize';
 import { latestClosedCandle } from '@/lib/paper/signals';
 import { getStrategy } from '@/lib/strategy/registry';
 import { atr, type IndicatorCandle } from '@/lib/strategy/indicators';
-import { regimeForStrategy } from '@/lib/strategy/evaluation';
+import { closedCandlesThrough, regimeForStrategy } from '@/lib/strategy/evaluation';
 import { MultiPairScanRepository, MULTI_PAIR_TIMEFRAME, type MultiPairScanRun, type MultiPairUniverse } from './multi-pair-repository';
 import { selectMultiPairUniverse, MULTI_PAIR_MAX_PAIRS, MULTI_PAIR_MIN_VOLUME_IDR, MULTI_PAIR_MAX_SPREAD_BPS } from './multi-pair-universe';
 
@@ -24,14 +23,9 @@ function indicatorCandles(candles: Awaited<ReturnType<typeof getHistoricalCandle
   return candles.map((candle) => ({ high: Number(candle.high), low: Number(candle.low), close: Number(candle.close), volume: Number(candle.volume) }));
 }
 
-async function pairMetadata(markets: MarketSnapshot[]): Promise<Pair[]> {
-  const results = await Promise.all(markets.map((market) => getPairById(market.pairId).catch(() => undefined)));
-  return results.filter((pair): pair is Pair => pair !== undefined);
-}
-
 async function buildUniverse(nowMs: number): Promise<MultiPairUniverse> {
   const overview = await getMarketOverview();
-  const pairs = await pairMetadata(overview.markets);
+  const pairs = await getPairsMetadata();
   const candidates = selectMultiPairUniverse(overview.markets, pairs, nowMs, MULTI_PAIR_MAX_PAIRS * 2);
   const selected: MultiPairUniverse['pairs'] = [];
   for (const candidate of candidates) {
@@ -67,13 +61,14 @@ async function scanOne(run: MultiPairScanRun, pair: MultiPairUniverse['pairs'][n
     return;
   }
   if (await repository.latestClose(run.id, pair.pairId) >= candle.closeTimeMs) return;
-  const indicators = indicatorCandles(sorted.filter((item) => item.closeTimeMs <= candle.closeTimeMs));
+  const closedHistory = closedCandlesThrough(sorted, candle.closeTimeMs);
+  const indicators = indicatorCandles(closedHistory);
   if (indicators.length < 200) {
     await repository.recordError(run.id, `Warm-up belum mencapai 200 candle untuk ${pair.pairId}.`, nowMs);
     return;
   }
   if (!strategy) throw new Error('Strategi trend-following tidak terdaftar.');
-  const signal = strategy.evaluate({ candles: indicators, regime: regimeForStrategy(sorted) });
+  const signal = strategy.evaluate({ candles: indicators, regime: regimeForStrategy(closedHistory) });
   const volatility = atr(indicators).at(-1);
   const saved = await repository.recordObservation({
     runId: run.id,
