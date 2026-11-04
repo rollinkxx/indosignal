@@ -3,14 +3,17 @@
 Copy this prompt when continuing work in a fresh Manus session. Fill the conversation link and, if known, the task ID/priority. Attach the prior conversation for intent/rationale, but let the repository decide what is already done.
 
 ```text
-Continue the work tracked in this repository. Previous conversation/context link: <PASTE LINK HERE>
+Continue the work tracked in this repository. Previous conversation/context link (context only): <PASTE LINK HERE>
 Task or tracker ID (if known): <ID / title>
 
-Use the repository as the source of truth for current implementation and progress; use the linked conversation only to recover requirements, constraints, and decision rationale. First read AGENTS.md, README.md, and the Resume snapshot/task row in docs/AGENT-HANDOFF.md. Fetch origin and inspect the actual branch, commit, working tree, and PR/CI state. Compare the conversation's claimed changes against Git and the tracker before acting. Do not redo verified work or assume uncommitted changes survived a session change.
-
-Before coding, update/add the tracker row with IN PROGRESS, scope, acceptance evidence, and one concrete next action. Then resume only the unfinished work. After each meaningful slice, run and record the relevant verification, changed files, commit SHA, what remains unverified, next action, and blockers in docs/AGENT-HANDOFF.md; commit and push a recoverable checkpoint when possible. If blocked, record what exact access/environment/evidence would unblock it. Do not claim DONE without fresh evidence. Keep secrets out of the repository and logs.
-
-At handoff, leave the Resume snapshot accurate and report branch/commit, verified result, and the next action.
+Repository recovery protocol:
+1. Read AGENTS.md, README.md, TODO.md, docs/AGENT-HANDOFF.md (Resume snapshot and relevant tracker row), docs/AGENT-RESUME-TEMPLATE.md, and any additional documents referenced by those instructions.
+2. Fetch origin. Record default branch and latest origin/main SHA; inspect current branch, HEAD, working tree, recent commits, open PRs, reviews, CI checks, required checks, branch protection, and relevant issue/tracker state. Do not assume old conversation evidence is current.
+3. Compare the Resume snapshot and attached conversation claims against Git, GitHub PR/CI, and the task tracker. Reconcile stale snapshot claims before substantive work. Do not redo verified work or assume uncommitted changes survived a session change.
+4. Continue only the earliest unfinished task in the repository's declared sequence. Before implementation, set/add the tracker row to IN PROGRESS with scope, acceptance evidence, branch, and one concrete next action.
+5. Work on a task-specific branch and PR. Run relevant checks, record exact commands/results and test counts, distinguish verified from unverified claims, and commit/push a recoverable checkpoint after each meaningful slice. Never bypass required reviews, branch protection, or security controls.
+6. If blocked, record the exact dependency and what would unblock it. Do not claim DONE without fresh evidence that acceptance criteria are met. Keep secrets and private operational values out of the repository and logs.
+7. At handoff, update the Resume snapshot with last reconciled timestamp/time zone/main SHA, active task/status/branch/commit, one immediate next action, correct next priority, last known verification, current blockers, and a conversation link for context only. Report the recorded branch/commit and verification boundaries.
 ```
 
 ## Recommended use of a conversation link
