@@ -13,11 +13,15 @@ const IMPLEMENTATION_ROOTS = [
   'public/',
   'db/',
   'migrations/',
+  '.github/actions/',
   '.github/workflows/',
 ];
 
 const IMPLEMENTATION_ROOT_FILES = [
   /^\.dockerignore$/,
+  /^\.env(?:\..*)?$/,
+  /^\.gitignore$/,
+  /^\.npmrc$/,
   /^Dockerfile(?:\..*)?$/,
   /^docker-compose(?:\.[^.]+)?\.ya?ml$/,
   /^eslint\.config\.[^/]+$/,
@@ -28,6 +32,8 @@ const IMPLEMENTATION_ROOT_FILES = [
   /^postcss\.config\.[^/]+$/,
   /^tsconfig(?:\.[^/]+)?\.json$/,
   /^vitest\.config\.[^/]+$/,
+  /^[^.][^/]*\.(?:[cm]?[jt]sx?|d\.ts)$/,
+  /^[^.][^/]*\.(?:json|toml|ya?ml)$/,
 ];
 
 function normalizePath(filePath) {

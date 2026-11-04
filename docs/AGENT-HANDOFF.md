@@ -1,17 +1,17 @@
 # Agent Handoff: Multipair Scanner & Application Audit
 
-**Last updated:** 2026-11-04 17:59 WIB
+**Last updated:** 2026-11-04 18:07 WIB
 **Repository:** `rollinkxx/indosignal`
-**Latest `main` observed:** `0564d60cd8024b371caf60af2d804f6e2e8001b5`
+**Latest `main` observed:** `e013c76e57c398068cbafda87f6afee8ac220d54`
 **Purpose:** Durable work log and source of truth for agents continuing scanner, audit, or remediation. Read this before starting; update it as work progresses, not only at session end.
 
 ## Resume snapshot — reconcile with Git before acting
 
-**Last reconciled:** 2026-11-04 17:56 WIB against `origin/main` at `0564d60cd8024b371caf60af2d804f6e2e8001b5`.
-**Current focus:** M-03, `IN PROGRESS`, PR #12, branch `docs/M-03-awaiting-approval-status`, implementation `4409bb4`, checkpoint `2faad1f`; formalize approval-wait status and transitions.
-**Immediate next action:** Verify PR #12 CI/review requirements, then merge only if all repo controls pass.
+**Last reconciled:** 2026-11-04 18:02 WIB against `origin/main` at `e013c76e57c398068cbafda87f6afee8ac220d54`.
+**Current focus:** M-04, `IN PROGRESS`, branch `ci/M-04-strengthen-handoff-gate`, base `e013c76e57c398068cbafda87f6afee8ac220d54`; audit implementation/config coverage and deterministic handoff-checker gaps.
+**Immediate next action:** Commit the verified M-04 slice, then run `pnpm check:handoff-update` against the exact base/head SHA range and open the PR if it passes.
 **Next application priority after agent-workflow tasks:** A-01 remains `TODO`: recover and review the prior uncommitted remediation patch; no A-01 code edits are in progress.
-**Last known verification:** M-03 `git diff --check` and status consistency `grep` checks across handoff, resume template, AGENTS, README, and PR template passed before commit `4409bb4`; M-03 CI pending. M-02 PR CI `41817157589` succeeded (13 files / 85 tests; typecheck, static gates, build, audit) and post-merge `main` CI `41817396993` succeeded. These checks do not prove production behavior.
+**Last known verification:** M-04 `pnpm exec vitest run tests/handoff-update-check.test.ts` passed 1 file / 18 tests; `pnpm typecheck`; `pnpm test` (13 files / 92 tests); `pnpm check:market-mocks`; `pnpm check:docker-security`; `pnpm build`; `pnpm audit --audit-level high`; and `git diff --check` all passed. Real-branch CLI check pending. M-03 post-merge CI `41818010121` passed all configured checks.
 **Known blockers:** No blocker for M-series workflow work. Application backlog still lacks a disposable/staging PostgreSQL target, current Hostless deployment evidence, and external WORM receipt (A-03 through A-06).
 **Conversation handoff:** Use `docs/AGENT-RESUME-TEMPLATE.md` for a prior-session link. Read that history for intent/decisions only, then reconcile every status/claim against Git, CI, and this tracker.
 
@@ -59,8 +59,8 @@ Each row must answer: what is the state; where is the work (branch/commit/files)
 | H-04 | Enforce tracker updates for implementation/configuration PRs | `DONE` | PR #9 (`ci/require-handoff-on-code-pr`); implementation `63cd0a830312845d136de5f6e5e31ca1c82c77d4`; PR head `b464484ccd18b4f1f7d66785a9f590b6396c24bc`; merge `1ebce0352d0b70dbfd95b81b71eacbc6c38e4022` | PR run `41782005671`, follow-up PR run `41782234982`, and `main` push run `41782348083` succeeded; PR state `MERGED` verified | Preserve the gate; next application priority is A-01 after M-series | None |
 | M-01 | Reconcile H-04 and PR #9 evidence | `DONE` | PR #10; branch `chore/M-01-reconcile-h04-pr9`; commit `4ebe50afbeb6baabdbd14d684001e8fb81762000`; merge `8641f104f81506125d4f7f87e4f5b88bb4e75f57` | PR #10 merged; CI `41815214824` and post-merge main CI `41815564475` success; `git diff --check` passed | Continue to M-02 | None |
 | M-02 | Synchronize resume snapshot and handoff workflow | `DONE` | PR #11, branch `docs/M-02-sync-agent-resume`; implementation `f4033f0`, final head `95d003e8f5a19f9f458bf4297d111592cdaab3d4`; merge `0564d60cd8024b371caf60af2d804f6e2e8001b5`; README, AGENTS, PR template, resume template, handoff | `git diff --check` and snapshot/template `grep` passed; PR CI `41817157589` success (13 files / 85 tests); PR #11 merged; post-merge main CI `41817396993` success | Continue to M-03 | None |
-| M-03 | Document `AWAITING APPROVAL` status and transitions | `IN PROGRESS` | PR #12; branch `docs/M-03-awaiting-approval-status`; implementation `4409bb4`, checkpoint `2faad1f`; handoff, README, AGENTS, PR template, resume template | `git diff --check` and targeted status `grep` checks passed; M-02 PR CI `41817157589` (13 files / 85 tests) and post-merge CI `41817396993` passed; PR #12 CI pending | Verify PR #12 checks/reviews and merge only when requirements pass | None |
-| M-04 | Strengthen handoff checker and CI | `TODO` | Not started | Existing checker/gate reviewed as baseline | Audit actual repo coverage and add deterministic tests | None |
+| M-03 | Document `AWAITING APPROVAL` status and transitions | `DONE` | PR #12; branch `docs/M-03-awaiting-approval-status`; implementation `4409bb4`; merge `e013c76e57c398068cbafda87f6afee8ac220d54`; handoff, README, AGENTS, PR template, resume template | `git diff --check` and status `grep` passed; PR CI `41817906259` passed; PR #12 merged; post-merge `main` CI `41818010121` passed | Apply status transitions for future work | None |
+| M-04 | Strengthen handoff checker and CI | `IN PROGRESS` | `ci/M-04-strengthen-handoff-gate`; base `e013c76e57c398068cbafda87f6afee8ac220d54`; `scripts/check-handoff-update.mjs`, `tests/handoff-update-check.test.ts`, handoff | Added deterministic path coverage for root runtime/config and `.github/actions/`; focused suite 1 file / 18 tests, typecheck, full suite 13 files / 92 tests, market-mock/Docker gates, production build, dependency audit, and `git diff --check` passed. Real-branch `check:handoff-update` CLI remains to run. | Commit the slice, run the real base/head CLI, then open PR and verify CI | None |
 | M-05 | Standardize task reporting | `TODO` | Not started | Pending | Extend existing template without duplication | None |
 | M-06 | Simulate Manus workflow end-to-end | `TODO` | Not started | Pending | Use temporary repositories/fixtures only | None |
 | M-07 | Evaluate further automation | `TODO` | Not started | Pending | Record implement/defer/not-needed decisions | None |
@@ -122,3 +122,6 @@ Call the overall scanner/audit task complete only when each relevant tracker row
 - 2026-11-04 17:57 WIB — M-03 started on `docs/M-03-awaiting-approval-status` from main `0564d60cd8024b371caf60af2d804f6e2e8001b5`. Added formal `AWAITING APPROVAL` semantics/transitions and synchronized README, AGENTS, PR template, and resume prompt; consistency and CI checks pending.
 - 2026-11-04 17:58 WIB — M-03 documentation commit `4409bb4` created. `git diff --check` and targeted `grep` checks found `AWAITING APPROVAL` and the approval-vs-CI distinction across the synchronized files. Push/PR CI pending.
 - 2026-11-04 17:59 WIB — PR #12 opened from `docs/M-03-awaiting-approval-status` with implementation `4409bb4` and checkpoint `2faad1f`. Local status/diff checks passed; PR CI/review verification pending.
+- 2026-11-04 18:02 WIB — PR #12 merged as `e013c76e57c398068cbafda87f6afee8ac220d54`; CI `41817906259` on PR and post-merge main CI `41818010121` succeeded. M-03 marked `DONE`; started M-04 on `ci/M-04-strengthen-handoff-gate` from the verified main SHA.
+- 2026-11-04 18:06 WIB — M-04 path audit found root runtime/config gaps (`app.config.ts`, `instrumentation.ts`, `next-env.d.ts`, `.env.example`) and missing `.github/actions/` coverage. Added path classification and ten deterministic path cases; focused suite passes 18 tests, typecheck and diff check pass. Full quality gates and real-branch CLI check pending.
+- 2026-11-04 18:07 WIB — M-04 full local validation passed: `pnpm test` (13 files / 92 tests), typecheck, market-mock and Docker checks, production build, dependency audit, and diff check. Next commit and run the named handoff gate against the exact main/base and branch/head SHA.

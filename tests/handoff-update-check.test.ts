@@ -44,7 +44,18 @@ describe('checkHandoffCoverage', () => {
     expect(checkHandoffCoverage(['README.md', 'docs/AGENT-RESUME-TEMPLATE.md'], '')).toMatchObject({ required: false, covered: true });
   });
 
-  it.each(['package.json', 'Dockerfile', '.github/workflows/ci.yml'])(
+  it.each([
+    'package.json',
+    'Dockerfile',
+    '.github/workflows/ci.yml',
+    '.github/actions/deploy/action.yml',
+    'app.config.ts',
+    'instrumentation.ts',
+    'next-env.d.ts',
+    '.env.example',
+    '.npmrc',
+    'vercel.json',
+  ])(
     'requires a task-row update when operational config %s changes',
     (path) => {
       expect(checkHandoffCoverage([path], '')).toMatchObject({ required: true, covered: false });
