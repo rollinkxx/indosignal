@@ -1,17 +1,17 @@
 # Agent Handoff: Multipair Scanner & Application Audit
 
-**Last updated:** 2026-11-04 18:09 WIB
+**Last updated:** 2026-11-04 18:16 WIB
 **Repository:** `rollinkxx/indosignal`
-**Latest `main` observed:** `e013c76e57c398068cbafda87f6afee8ac220d54`
+**Latest `main` observed:** `c0887182a65577cdf0fb3d65c684e6164d8fe3fd`
 **Purpose:** Durable work log and source of truth for agents continuing scanner, audit, or remediation. Read this before starting; update it as work progresses, not only at session end.
 
 ## Resume snapshot — reconcile with Git before acting
 
-**Last reconciled:** 2026-11-04 18:02 WIB against `origin/main` at `e013c76e57c398068cbafda87f6afee8ac220d54`.
-**Current focus:** M-04, `IN PROGRESS`, PR #13, branch `ci/M-04-strengthen-handoff-gate`, implementation `b95af83`, latest checkpoint `62112566df77b3654b5662c0e6382d3d2531ea2a`; audit implementation/config coverage and deterministic handoff-checker gaps.
-**Immediate next action:** Verify CI/review requirements on PR #13, then merge only if all repository controls pass.
+**Last reconciled:** 2026-11-04 18:12 WIB against `origin/main` at `c0887182a65577cdf0fb3d65c684e6164d8fe3fd`.
+**Current focus:** M-05, `IN PROGRESS`, branch `docs/M-05-standardize-task-reporting`, base `c0887182a65577cdf0fb3d65c684e6164d8fe3fd`; standardize the user-facing completion summary by extending existing guidance/template fields without creating a duplicate report form.
+**Immediate next action:** Commit and push the reporting-guidance changes, open the M-05 documentation PR, and verify its CI.
 **Next application priority after agent-workflow tasks:** A-01 remains `TODO`: recover and review the prior uncommitted remediation patch; no A-01 code edits are in progress.
-**Last known verification:** Commit `b95af83df6b051c6ba79d1761d7bbc1404b1048a` passes `pnpm check:handoff-update e013c76e57c398068cbafda87f6afee8ac220d54 b95af83df6b051c6ba79d1761d7bbc1404b1048a` on the actual branch diff. Focused suite (1 file / 18 tests), full suite (`pnpm test`: 13 files / 92 tests), typecheck, market-mock/Docker gates, production build, dependency audit, and `git diff --check` also passed. PR CI pending.
+**Last known verification:** M-05 `git diff --check` and targeted field-consistency checks passed. README has exactly one continuation paragraph and one final-report reference; resume prompt has one final-report block; PR template has one verification section. M-04 PR CI `41819061846` and post-merge `main` CI `41819166573` both succeeded. M-05 PR CI pending.
 **Known blockers:** No blocker for M-series workflow work. Application backlog still lacks a disposable/staging PostgreSQL target, current Hostless deployment evidence, and external WORM receipt (A-03 through A-06).
 **Conversation handoff:** Use `docs/AGENT-RESUME-TEMPLATE.md` for a prior-session link. Read that history for intent/decisions only, then reconcile every status/claim against Git, CI, and this tracker.
 
@@ -60,8 +60,8 @@ Each row must answer: what is the state; where is the work (branch/commit/files)
 | M-01 | Reconcile H-04 and PR #9 evidence | `DONE` | PR #10; branch `chore/M-01-reconcile-h04-pr9`; commit `4ebe50afbeb6baabdbd14d684001e8fb81762000`; merge `8641f104f81506125d4f7f87e4f5b88bb4e75f57` | PR #10 merged; CI `41815214824` and post-merge main CI `41815564475` success; `git diff --check` passed | Continue to M-02 | None |
 | M-02 | Synchronize resume snapshot and handoff workflow | `DONE` | PR #11, branch `docs/M-02-sync-agent-resume`; implementation `f4033f0`, final head `95d003e8f5a19f9f458bf4297d111592cdaab3d4`; merge `0564d60cd8024b371caf60af2d804f6e2e8001b5`; README, AGENTS, PR template, resume template, handoff | `git diff --check` and snapshot/template `grep` passed; PR CI `41817157589` success (13 files / 85 tests); PR #11 merged; post-merge main CI `41817396993` success | Continue to M-03 | None |
 | M-03 | Document `AWAITING APPROVAL` status and transitions | `DONE` | PR #12; branch `docs/M-03-awaiting-approval-status`; implementation `4409bb4`; merge `e013c76e57c398068cbafda87f6afee8ac220d54`; handoff, README, AGENTS, PR template, resume template | `git diff --check` and status `grep` passed; PR CI `41817906259` passed; PR #12 merged; post-merge `main` CI `41818010121` passed | Apply status transitions for future work | None |
-| M-04 | Strengthen handoff checker and CI | `IN PROGRESS` | PR #13; branch `ci/M-04-strengthen-handoff-gate`; implementation `b95af83`, latest checkpoint `62112566df77b3654b5662c0e6382d3d2531ea2a`; checker, tests, handoff | Actual base/head CLI check passed; focused 18 and full 92 tests, typecheck, static gates, production build, dependency audit, diff check passed. PR #13 CI pending. | Verify PR #13 checks/reviews and merge only when all controls pass | None |
-| M-05 | Standardize task reporting | `TODO` | Not started | Pending | Extend existing template without duplication | None |
+| M-04 | Strengthen handoff checker and CI | `DONE` | PR #13; branch `ci/M-04-strengthen-handoff-gate`; implementation `b95af83`; merge `c0887182a65577cdf0fb3d65c684e6164d8fe3fd`; checker/tests/handoff | Actual-diff gate passed; focused 18 and full 92 tests, typecheck, market-mock/Docker checks, build and audit passed; PR CI `41819061846` and post-merge main CI `41819166573` succeeded | Gate now covers tracked runtime/config path classes; maintain regression tests | None |
+| M-05 | Standardize task reporting | `IN PROGRESS` | `docs/M-05-standardize-task-reporting`; README, AGENTS, resume prompt, PR template, handoff | `git diff --check` and targeted grep checks passed: single README continuation paragraph, one final-report reference/block, and one PR verification section. Final summary fields now map to existing PR/handoff evidence. CI pending. | Commit and open PR; verify CI before merge | None |
 | M-06 | Simulate Manus workflow end-to-end | `TODO` | Not started | Pending | Use temporary repositories/fixtures only | None |
 | M-07 | Evaluate further automation | `TODO` | Not started | Pending | Record implement/defer/not-needed decisions | None |
 | A-01 | Recover and review the earlier uncommitted remediation batch | `TODO` | No complete patch/ref is present in the current checkout; see details below | Earlier session reported local edits, but the patch was not committed and did not carry into the current clone | Recover full patch from saved artifacts/history; compare against current `main` before applying; keep only reviewed changes | Partial snapshots are not a complete, trustworthy patch |
@@ -127,3 +127,5 @@ Call the overall scanner/audit task complete only when each relevant tracker row
 - 2026-11-04 18:07 WIB — M-04 full local validation passed: `pnpm test` (13 files / 92 tests), typecheck, market-mock and Docker checks, production build, dependency audit, and diff check. Next commit and run the named handoff gate against the exact main/base and branch/head SHA.
 - 2026-11-04 18:07 WIB — Commit `b95af83` created and actual-diff CLI check passed using base `e013c76e57c398068cbafda87f6afee8ac220d54` and head `b95af83df6b051c6ba79d1761d7bbc1404b1048a`. Next push branch and open M-04 PR.
 - 2026-11-04 18:09 WIB — PR #13 opened from `ci/M-04-strengthen-handoff-gate`; implementation commit `b95af83`, checkpoint `62112566`. Local focused/full checks and actual-diff checker passed. PR CI pending.
+- 2026-11-04 18:12 WIB — PR #13 merged as `c0887182a65577cdf0fb3d65c684e6164d8fe3fd`; PR CI `41819061846` and post-merge main CI `41819166573` succeeded. M-04 marked `DONE`; started M-05 on `docs/M-05-standardize-task-reporting` from that verified main SHA.
+- 2026-11-04 18:16 WIB — M-05 extended the existing resume prompt with one concise final-report schema, clarified exact verification/CI fields in the existing PR template, and linked the format from README/AGENTS. `git diff --check` and targeted duplicate/field-count checks passed; no new report template was created. PR pending.
