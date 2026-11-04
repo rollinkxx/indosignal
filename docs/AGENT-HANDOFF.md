@@ -1,8 +1,8 @@
 # Agent Handoff: Multipair Scanner & Application Audit
 
-**Last updated:** 2026-11-04 12:24 WIB
+**Last updated:** 2026-11-04 12:26 WIB
 **Repository:** `rollinkxx/indosignal`
-**Latest `main` observed:** `e2ed4fecae1a24cc442bf177213cd6bcc9a61209`
+**Latest `main` observed:** `8fb15b74df96d80baf93618cbfe9cbb26c8c6d23`
 **Purpose:** Durable work log and source of truth for agents continuing scanner, audit, or remediation. Read this before starting; update it as work progresses, not only at session end.
 
 ## Start here — required protocol
@@ -31,7 +31,7 @@ Each row must answer: what is the state; where is the work (branch/commit/files)
 | ID | Work item | Status | Branch / commit / files | Verification evidence | Next action | Blocker |
 |---|---|---|---|---|---|---|
 | H-01 | Durable README entry and detailed handoff tracker | `DONE` | Merged by PR #4; merge commit `e2ed4fecae1a24cc442bf177213cd6bcc9a61209`; `README.md`, `docs/AGENT-HANDOFF.md` | PR #4 `CI/quality-gates` passed; PR state `MERGED` verified on 2026-11-04 | Maintain the tracker as work changes | None |
-| H-02 | Implement checkpoint protocol and status table | `IN PROGRESS` | Branch `docs/checkpoint-handoff-protocol`; commit `3318452`; `README.md`, `docs/AGENT-HANDOFF.md` | On commit `3318452`, `git diff --check`, presence of required status labels/template, and README-to-handoff link checks passed; staged diff check passed | Open PR; await required CI; update this row with final PR/merge evidence | CI on this change pending |
+| H-02 | Implement checkpoint protocol and status table | `DONE` | PR #5; merge commit `8fb15b74df96d80baf93618cbfe9cbb26c8c6d23`; `README.md`, `docs/AGENT-HANDOFF.md` | PR #5 `CI/quality-gates` passed; GitHub state `MERGED`; `origin/main` advanced to the recorded merge commit on 2026-11-04 | Follow the protocol for all future work and keep the task tracker current | None |
 | A-01 | Recover and review the earlier uncommitted remediation batch | `TODO` | No complete patch/ref is present in the current checkout; see details below | Earlier session reported local edits, but the patch was not committed and did not carry into the current clone | Recover full patch from saved artifacts/history; compare against current `main` before applying; keep only reviewed changes | Partial snapshots are not a complete, trustworthy patch |
 | A-02 | Run multipair scanner and application baseline checks | `DONE` | Baseline code at `6f34565e4314c2e3852eb569f8a408e418932546`; scanner implementation and `tests/multi-pair-universe.test.ts` are present | Fresh run on 2026-11-04: `pnpm install --frozen-lockfile`, `pnpm typecheck`, `pnpm test` (12 files/74 tests), `pnpm check:market-mocks`, `pnpm check:docker-security`, `pnpm build` all passed | Do not infer live scanning/deployment from local tests; perform operational checks below | Live provider, production worker, and production deployment were not verified |
 | A-03 | Disposable PostgreSQL integration checks and migration validation | `BLOCKED` | No disposable/staging DB was configured in this sandbox; no production DB touched | No DB integration test has been run in this continuation | Obtain an authorized disposable/staging PostgreSQL target; run migration and proof scripts only there | Safe PostgreSQL test environment unavailable |
@@ -70,3 +70,4 @@ Call the overall scanner/audit task complete only when each relevant tracker row
 
 - 2026-11-04 12:15 WIB — Added the initial detailed handoff and linked it from README (PR #4, merged as `e2ed4fe`).
 - 2026-11-04 12:24 WIB — Committed and pushed checkpoint protocol, explicit statuses, task table, template, and README start instructions as `3318452`; documentation checks passed locally; CI/PR pending.
+- 2026-11-04 12:26 WIB — PR #5 quality-gates passed and the checkpoint protocol was merged; main merge commit `8fb15b7`. H-02 marked `DONE` with verified evidence.
