@@ -8,7 +8,7 @@
 
 **Tech Stack:** Node.js 22, pnpm 10.34.5, Vitest, TypeScript, Node filesystem/process APIs, and local Git.
 
-**Spec:** `/home/ubuntu/upload/pasted_content.txt`, sections “M-06 — Simulasi Workflow Manus End-to-End” and “FINAL VERIFICATION”; repository instructions in `AGENTS.md` and `docs/AGENT-HANDOFF.md`.
+**Spec:** User-supplied master execution plan, sections “M-06 — Simulasi Workflow Manus End-to-End” and “FINAL VERIFICATION”; repository instructions in `AGENTS.md` and `docs/AGENT-HANDOFF.md`.
 
 ## Global Constraints
 
@@ -44,7 +44,7 @@
 - [x] Run `pnpm exec vitest run tests/handoff-update-check.test.ts`; confirm the rename test fails against current `git diff --name-only` behavior (1 failed, 19 skipped; checker incorrectly returned `0`).
 - [x] Add a deletion regression test for `app/route.ts` without a handoff row; assert checker exit code `1`.
 - [x] Change CLI changed-path collection to `git diff --name-only --no-renames <range>` so source and destination paths remain visible.
-- [x] Run the focused tests and assert rename, deletion, existing missing-handoff, cosmetic-only, valid-row, invalid-SHA, missing-Git-context, and colored-output cases pass (20/20).
+- [x] Run the focused tests and assert rename, deletion, existing missing-handoff, cosmetic-only, valid-row, `AWAITING APPROVAL` row format, invalid-SHA, missing-Git-context, redacted Git stderr, and colored-output cases pass (22/22).
 - [x] Run `git diff --check` and record this discovered false-success gap in the M-06 tracker/evidence.
 
 ### Task 2: Rehearse the six workflow scenarios in isolated fixtures
@@ -58,15 +58,15 @@
 - Consumes: Task 1's real handoff checker CLI, task-row format, status definitions, and Git history.
 - Produces: deterministic Vitest cases and a scenario/evidence table with an explicit fixture-only boundary.
 
-- [ ] Add a `simulatesNormalCompletionAndFreshCloneRecovery` test using a local bare remote: read fixture instructions, locate TODO, inspect Git, update tracker to `IN PROGRESS`, create a task branch, change a fixture source file, run its smoke test and handoff gate, commit/push, simulate a local merge, mark the fixture task `DONE`, then clone afresh and recover its status/commit/next action from Git and the handoff file.
-- [ ] Add a `detectsCiFailureThenPassesAfterFix` test: make a deterministic fixture smoke check fail, assert the failure is visible and task is not `DONE`, fix the fixture, rerun the smoke check and gate, and assert success.
-- [ ] Add a `preservesBlockedState` test: record a named dependency and next action, then assert no completion or merge transition occurs.
-- [ ] Add a `reconcilesStaleSnapshotAgainstMain` test: store an old fixture SHA, advance fixture `main`, compare the recorded SHA to the observed branch SHA, update the snapshot, and assert equality.
-- [ ] Add a `rejectsMissingHandoffWithoutLeakingSentinel` test: implementation-only diff fails the actual checker; assert its output does not contain a sentinel private value.
-- [ ] Ensure every test cleans up its temporary worktree/bare remote in `finally`, including failing assertions.
-- [ ] Run `pnpm exec vitest run tests/agent-workflow-rehearsal.test.ts tests/handoff-update-check.test.ts` and verify all six requested scenario categories plus rename/deletion behavior.
-- [ ] Write `docs/M-06-SIMULATION.md` with scenario, exact test/command, result, and limits; state that the local bare remote is not a real GitHub PR or Actions run.
-- [ ] Run `pnpm typecheck`, `pnpm test`, `pnpm check:market-mocks`, `pnpm check:docker-security`, `pnpm build`, `pnpm audit --audit-level high`, and `git diff --check`.
+- [x] Add a `simulatesNormalCompletionAndFreshCloneRecovery` test using a local bare remote: read fixture instructions, locate TODO, inspect Git, update tracker to `IN PROGRESS`, create a task branch, change a fixture source file, run its smoke test and handoff gate, commit/push, simulate a local merge, mark the fixture task `DONE`, then clone afresh and recover its status/commit/next action from Git and the handoff file.
+- [x] Add a `detectsCiFailureThenPassesAfterFix` test: make a deterministic fixture smoke check fail, assert the failure is visible and task is not `DONE`, fix the fixture, rerun the smoke check and gate, and assert success.
+- [x] Add a `preservesBlockedState` test: record a named dependency and next action, then assert no completion or merge transition occurs.
+- [x] Add a `reconcilesStaleSnapshotAgainstMain` test: store an old fixture SHA, advance fixture `main`, compare the recorded SHA to the observed branch SHA, update the snapshot, and assert equality.
+- [x] Add a `rejectsMissingHandoffWithoutLeakingSentinel` test: implementation-only diff fails the actual checker; assert its output does not contain a sentinel private value.
+- [x] Ensure every test cleans up its temporary worktree/bare remote in `finally`, including failing assertions.
+- [x] Run `corepack pnpm exec vitest run tests/agent-workflow-rehearsal.test.ts tests/handoff-update-check.test.ts` and verify all six requested scenario categories plus rename/deletion, `AWAITING APPROVAL`, and no-leak behavior (2 files / 27 tests passed).
+- [x] Write `docs/M-06-SIMULATION.md` with scenario, exact test/command, result, and limits; state that the local bare remote is not a real GitHub PR or Actions run.
+- [x] Run `corepack pnpm typecheck`, `corepack pnpm test` (14 files / 101 tests), `corepack pnpm check:market-mocks`, `corepack pnpm check:docker-security`, `corepack pnpm build`, `corepack pnpm audit --audit-level high`, and `git diff --check` — all passed locally.
 - [ ] Run the actual handoff CLI against the exact M-06 base/head SHAs; commit, push, open the dedicated PR, verify CI/review/rules, merge only if allowed, and verify post-merge main CI.
 
 ## Self-review

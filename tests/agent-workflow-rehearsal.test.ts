@@ -165,6 +165,7 @@ describe('isolated Manus workflow rehearsal', () => {
       expect(recoveredRow).toContain(taskCommit);
       expect(recoveredRow).toContain('fixture reviewer approval recorded');
       expect(recoveredRow).toContain('| None | None |');
+      expect(git(freshClone, 'rev-parse', `origin/${branch}`)).toBe(branchHead);
       expect(git(freshClone, 'cat-file', '-e', `${taskCommit}^{commit}`)).toBe('');
       expect(git(freshClone, 'rev-parse', 'HEAD')).not.toBe(baseSha);
     } finally {
