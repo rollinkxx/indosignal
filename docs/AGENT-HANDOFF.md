@@ -1,16 +1,16 @@
 # Agent Handoff: Multipair Scanner & Application Audit
 
-**Last updated:** 2026-11-04 12:38 WIB
+**Last updated:** 2026-11-04 12:45 WIB
 **Repository:** `rollinkxx/indosignal`
-**Latest `main` observed:** `d3226acaf24b9ba3a3eb933aeaf5615557e53e8f`
+**Latest `main` observed:** `f14ac49722434dc78f9c44bc92132e38b9ed2b03`
 **Purpose:** Durable work log and source of truth for agents continuing scanner, audit, or remediation. Read this before starting; update it as work progresses, not only at session end.
 
 ## Resume snapshot — reconcile with Git before acting
 
-**Last reconciled:** 2026-11-04 12:38 WIB against `origin/main` at `d3226ac`.
-**Current focus:** H-03 context-recovery system is merged and `DONE` (PR #7; merge `d3226ac`). Next application task is A-01: recover and review the previous uncommitted remediation patch; no code edits for A-01 are in progress in this checkout.
-**Immediate next action:** For A-01, inspect the available session artifacts/history, compare candidate file snapshots against `origin/main`, and restore only a complete, reviewable patch on a feature branch. If no full patch can be recovered, document that and pick up the highest-value remediation without repeating verified baseline checks.
-**Existing application work priority after H-03:** A-01 is still `TODO`. Recover the full prior uncommitted remediation patch and compare it with current Git before editing; do not assume it exists in this checkout.
+**Last reconciled:** 2026-11-04 12:42 WIB against `origin/main` at `f14ac49`.
+**Current focus:** H-04, `IN PROGRESS`, branch `ci/require-handoff-on-code-pr`; implementing an automated PR gate so source/config changes cannot omit the task-row handoff update. Approved plan: `docs/superpowers/plans/2026-11-04-handoff-ci-enforcement.md`.
+**Immediate next action:** Run typecheck/full tests and the checker on the current branch diff; verify the CI workflow wiring and documentation scope; then open a PR and wait for its quality gate.
+**Next application priority after H-04:** A-01 remains `TODO`: recover and review the prior uncommitted remediation patch; no A-01 code edits are in progress.
 **Last known code verification:** Baseline commit `6f34565e4314c2e3852eb569f8a408e418932546` passed typecheck, 12 test files / 74 tests, static market-mock and Docker-security checks, and production build on 2026-11-04. That evidence does not prove live provider, production, DB, or Docker image behavior.
 **Known blockers:** No disposable/staging PostgreSQL target, current Hostless configuration/deployment evidence, or external WORM receipt is recorded. See A-03 through A-06 below.
 **Conversation handoff:** Use `docs/AGENT-RESUME-TEMPLATE.md` for a prior-session link. Read that history for intent/decisions only, then reconcile every status/claim against Git, CI, and this tracker.
@@ -43,6 +43,7 @@ Each row must answer: what is the state; where is the work (branch/commit/files)
 | H-01 | Durable README entry and detailed handoff tracker | `DONE` | Merged by PR #4; merge commit `e2ed4fecae1a24cc442bf177213cd6bcc9a61209`; `README.md`, `docs/AGENT-HANDOFF.md` | PR #4 `CI/quality-gates` passed; PR state `MERGED` verified on 2026-11-04 | Maintain the tracker as work changes | None |
 | H-02 | Implement checkpoint protocol and status table | `DONE` | PR #5; merge commit `8fb15b74df96d80baf93618cbfe9cbb26c8c6d23`; `README.md`, `docs/AGENT-HANDOFF.md` | PR #5 `CI/quality-gates` passed; GitHub state `MERGED`; `origin/main` advanced to the recorded merge commit on 2026-11-04 | Follow the protocol for all future work and keep the task tracker current | None |
 | H-03 | Make context recovery robust across conversations and credit interruptions | `DONE` | PR #7; implementation commit `44994c2`; merge commit `d3226acaf24b9ba3a3eb933aeaf5615557e53e8f`; `AGENTS.md`, `README.md`, `.github/pull_request_template.md`, `docs/AGENT-HANDOFF.md`, `docs/AGENT-RESUME-TEMPLATE.md` | Scripted file/reference checks and `git diff --check` passed; PR #7 `CI/quality-gates` passed; GitHub state `MERGED` and `origin/main` verified on 2026-11-04 | Apply these instructions on every continuation; resume A-01 from snapshot above | None |
+| H-04 | Enforce tracker updates for implementation/configuration PRs | `IN PROGRESS` | Branch `ci/require-handoff-on-code-pr`; plan `docs/superpowers/plans/2026-11-04-handoff-ci-enforcement.md`; checker/declaration/tests, package script, CI and docs | `corepack pnpm typecheck` passed after adding `.d.mts`; `corepack pnpm test` passed (13 files / 83 tests); focused checker tests passed (9) | Commit tested slice, run checker on actual branch base/head diff, validate CI workflow, then open PR | CI/PR pending |
 | A-01 | Recover and review the earlier uncommitted remediation batch | `TODO` | No complete patch/ref is present in the current checkout; see details below | Earlier session reported local edits, but the patch was not committed and did not carry into the current clone | Recover full patch from saved artifacts/history; compare against current `main` before applying; keep only reviewed changes | Partial snapshots are not a complete, trustworthy patch |
 | A-02 | Run multipair scanner and application baseline checks | `DONE` | Baseline code at `6f34565e4314c2e3852eb569f8a408e418932546`; scanner implementation and `tests/multi-pair-universe.test.ts` are present | Fresh run on 2026-11-04: `pnpm install --frozen-lockfile`, `pnpm typecheck`, `pnpm test` (12 files/74 tests), `pnpm check:market-mocks`, `pnpm check:docker-security`, `pnpm build` all passed | Do not infer live scanning/deployment from local tests; perform operational checks below | Live provider, production worker, and production deployment were not verified |
 | A-03 | Disposable PostgreSQL integration checks and migration validation | `BLOCKED` | No disposable/staging DB was configured in this sandbox; no production DB touched | No DB integration test has been run in this continuation | Obtain an authorized disposable/staging PostgreSQL target; run migration and proof scripts only there | Safe PostgreSQL test environment unavailable |
@@ -84,3 +85,6 @@ Call the overall scanner/audit task complete only when each relevant tracker row
 - 2026-11-04 12:26 WIB — PR #5 quality-gates passed and the checkpoint protocol was merged; main merge commit `8fb15b7`. H-02 marked `DONE` with verified evidence.
 - 2026-11-04 12:36 WIB — H-03 checkpoint `44994c2` adds root agent instructions, a resume snapshot, copyable conversation-link prompt, and PR checklist; scripted documentation/reference checks and `git diff --check` passed. PR/CI pending.
 - 2026-11-04 12:38 WIB — PR #7 `CI/quality-gates` passed; context-recovery system merged as `d3226ac`. H-03 marked `DONE`; next work is A-01 as stated in the resume snapshot.
+- 2026-11-04 12:45 WIB — H-04 classifier and nine unit tests added; red-phase failure confirmed the test imported a missing checker, then green-phase passed. Package script and pull-request CI wiring added; full verification and PR CI pending.
+- 2026-11-04 12:46 WIB — Typecheck exposed TS7016 on the new `.mjs` import; root cause is `allowJs=false` with no declaration file. Existing `.d.mts` pattern was verified; next add a local typed declaration and rerun.
+- 2026-11-04 12:47 WIB — Added `scripts/check-handoff-update.d.mts`; typecheck now passes and full suite passes (13 files / 83 tests). Proceed to real diff/CLI and CI validation.
