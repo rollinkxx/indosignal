@@ -17,12 +17,20 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 0
       - name: Setup Node.js 22
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: 22
       - name: Enable pnpm 10.34.5
         run: corepack enable && corepack prepare pnpm@10.34.5 --activate
+      - name: Require handoff task-row update for implementation PRs
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: pnpm check:handoff-update "$BASE_SHA" "$HEAD_SHA"
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Typecheck

@@ -4,6 +4,8 @@
 - Handoff updated in this PR: <!-- link docs/AGENT-HANDOFF.md section/row -->
 - Branch and checkpoint commit: <!-- branch / SHA -->
 
+For implementation or operational configuration changes, CI requires an added or edited task row in `docs/AGENT-HANDOFF.md`; a timestamp-only edit is insufficient. Documentation-only PRs are exempt.
+
 ## What changed and why
 
 <!-- Keep scope and user impact explicit. Link a prior conversation only when it adds intent/decision context. -->

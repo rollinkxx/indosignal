@@ -15,6 +15,7 @@
     "db:forward-test-proof": "tsx scripts/forward-test-db-proof.ts",
     "db:multi-pair-proof": "tsx scripts/multi-pair-scan-db-proof.ts",
     "check:market-mocks": "node scripts/check-no-market-mocks.mjs",
+    "check:handoff-update": "node scripts/check-handoff-update.mjs",
     "check:live": "node scripts/check-live-endpoints.mjs",
     "check:docker-security": "node scripts/check-docker-security.mjs",
     "audit:chain": "node scripts/audit-chain.mjs verify",
