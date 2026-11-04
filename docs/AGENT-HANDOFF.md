@@ -1,6 +1,6 @@
 # Agent Handoff: Multipair Scanner & Application Audit
 
-**Last updated:** 2026-11-04 17:57 WIB
+**Last updated:** 2026-11-04 17:59 WIB
 **Repository:** `rollinkxx/indosignal`
 **Latest `main` observed:** `0564d60cd8024b371caf60af2d804f6e2e8001b5`
 **Purpose:** Durable work log and source of truth for agents continuing scanner, audit, or remediation. Read this before starting; update it as work progresses, not only at session end.
@@ -8,8 +8,8 @@
 ## Resume snapshot — reconcile with Git before acting
 
 **Last reconciled:** 2026-11-04 17:56 WIB against `origin/main` at `0564d60cd8024b371caf60af2d804f6e2e8001b5`.
-**Current focus:** M-03, `IN PROGRESS`, branch `docs/M-03-awaiting-approval-status`, implementation commit `4409bb4`; formalize approval-wait status and transitions.
-**Immediate next action:** Push commit `4409bb4` and open the M-03 PR.
+**Current focus:** M-03, `IN PROGRESS`, PR #12, branch `docs/M-03-awaiting-approval-status`, implementation `4409bb4`, checkpoint `2faad1f`; formalize approval-wait status and transitions.
+**Immediate next action:** Verify PR #12 CI/review requirements, then merge only if all repo controls pass.
 **Next application priority after agent-workflow tasks:** A-01 remains `TODO`: recover and review the prior uncommitted remediation patch; no A-01 code edits are in progress.
 **Last known verification:** M-03 `git diff --check` and status consistency `grep` checks across handoff, resume template, AGENTS, README, and PR template passed before commit `4409bb4`; M-03 CI pending. M-02 PR CI `41817157589` succeeded (13 files / 85 tests; typecheck, static gates, build, audit) and post-merge `main` CI `41817396993` succeeded. These checks do not prove production behavior.
 **Known blockers:** No blocker for M-series workflow work. Application backlog still lacks a disposable/staging PostgreSQL target, current Hostless deployment evidence, and external WORM receipt (A-03 through A-06).
@@ -59,7 +59,7 @@ Each row must answer: what is the state; where is the work (branch/commit/files)
 | H-04 | Enforce tracker updates for implementation/configuration PRs | `DONE` | PR #9 (`ci/require-handoff-on-code-pr`); implementation `63cd0a830312845d136de5f6e5e31ca1c82c77d4`; PR head `b464484ccd18b4f1f7d66785a9f590b6396c24bc`; merge `1ebce0352d0b70dbfd95b81b71eacbc6c38e4022` | PR run `41782005671`, follow-up PR run `41782234982`, and `main` push run `41782348083` succeeded; PR state `MERGED` verified | Preserve the gate; next application priority is A-01 after M-series | None |
 | M-01 | Reconcile H-04 and PR #9 evidence | `DONE` | PR #10; branch `chore/M-01-reconcile-h04-pr9`; commit `4ebe50afbeb6baabdbd14d684001e8fb81762000`; merge `8641f104f81506125d4f7f87e4f5b88bb4e75f57` | PR #10 merged; CI `41815214824` and post-merge main CI `41815564475` success; `git diff --check` passed | Continue to M-02 | None |
 | M-02 | Synchronize resume snapshot and handoff workflow | `DONE` | PR #11, branch `docs/M-02-sync-agent-resume`; implementation `f4033f0`, final head `95d003e8f5a19f9f458bf4297d111592cdaab3d4`; merge `0564d60cd8024b371caf60af2d804f6e2e8001b5`; README, AGENTS, PR template, resume template, handoff | `git diff --check` and snapshot/template `grep` passed; PR CI `41817157589` success (13 files / 85 tests); PR #11 merged; post-merge main CI `41817396993` success | Continue to M-03 | None |
-| M-03 | Document `AWAITING APPROVAL` status and transitions | `IN PROGRESS` | `docs/M-03-awaiting-approval-status`; implementation `4409bb4`; handoff, README, AGENTS, PR template, resume template | `git diff --check` and targeted status `grep` checks passed; M-02 PR CI `41817157589` (13 files / 85 tests) and post-merge CI `41817396993` passed; M-03 CI pending | Push commit and open PR | None |
+| M-03 | Document `AWAITING APPROVAL` status and transitions | `IN PROGRESS` | PR #12; branch `docs/M-03-awaiting-approval-status`; implementation `4409bb4`, checkpoint `2faad1f`; handoff, README, AGENTS, PR template, resume template | `git diff --check` and targeted status `grep` checks passed; M-02 PR CI `41817157589` (13 files / 85 tests) and post-merge CI `41817396993` passed; PR #12 CI pending | Verify PR #12 checks/reviews and merge only when requirements pass | None |
 | M-04 | Strengthen handoff checker and CI | `TODO` | Not started | Existing checker/gate reviewed as baseline | Audit actual repo coverage and add deterministic tests | None |
 | M-05 | Standardize task reporting | `TODO` | Not started | Pending | Extend existing template without duplication | None |
 | M-06 | Simulate Manus workflow end-to-end | `TODO` | Not started | Pending | Use temporary repositories/fixtures only | None |
@@ -121,3 +121,4 @@ Call the overall scanner/audit task complete only when each relevant tracker row
 - 2026-11-04 17:56 WIB — GitHub cleared the merge-in-progress condition; PR #11 merged normally as `0564d60cd8024b371caf60af2d804f6e2e8001b5`. Latest PR CI `41817157589` and post-merge `main` CI `41817396993` succeeded. M-02 is `DONE`; started M-03 on `docs/M-03-awaiting-approval-status` from the verified merge SHA.
 - 2026-11-04 17:57 WIB — M-03 started on `docs/M-03-awaiting-approval-status` from main `0564d60cd8024b371caf60af2d804f6e2e8001b5`. Added formal `AWAITING APPROVAL` semantics/transitions and synchronized README, AGENTS, PR template, and resume prompt; consistency and CI checks pending.
 - 2026-11-04 17:58 WIB — M-03 documentation commit `4409bb4` created. `git diff --check` and targeted `grep` checks found `AWAITING APPROVAL` and the approval-vs-CI distinction across the synchronized files. Push/PR CI pending.
+- 2026-11-04 17:59 WIB — PR #12 opened from `docs/M-03-awaiting-approval-status` with implementation `4409bb4` and checkpoint `2faad1f`. Local status/diff checks passed; PR CI/review verification pending.
