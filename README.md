@@ -24,9 +24,9 @@ corepack pnpm build
 
 ## Status & handoff agen
 
-**Status terakhir (4 November 2026):** baseline `main` pada `6f34565` lulus typecheck, 74 tes pada 12 file, pemeriksaan market-mock, pemeriksaan Docker statis, dan production build. Ini adalah hasil untuk baseline tersebut; batch remediasi lokal dari audit sebelumnya belum dipulihkan atau diverifikasi pada checkout ini. Deployment production belum diverifikasi.
+Sebelum mulai mengubah kode, agen wajib membaca [tracker handoff](docs/AGENT-HANDOFF.md), memeriksa branch/working tree/commit terbaru, lalu mencatat pekerjaan sebagai `IN PROGRESS` beserta langkah berikutnya dan bukti selesai yang dibutuhkan. Tracker adalah sumber kebenaran status dan blocker; ringkasan percakapan saja bukan bukti perubahan ada di repo.
 
-Sebelum melanjutkan scanner multipair atau audit, baca [handoff agen](docs/AGENT-HANDOFF.md). Dokumen itu berisi daftar pekerjaan tertunda/selesai, bukti verifikasi dan batasnya, urutan tindak lanjut, serta aturan agar setiap agen memperbarui status di repo setelah perubahan atau temuan baru. Jangan menganggap laporan percakapan lama sebagai bukti bahwa patch sudah ada di branch.
+Setelah tiap unit kerja bermakna, agen harus menjalankan pemeriksaan relevan, mencatat path/hasil persis/commit dan langkah selanjutnya di tracker, lalu membuat commit kecil dan push checkpoint bila tersedia. Jika konteks atau kredit menipis, hentikan scope baru dan simpan status serta blocker sebelum berhenti. Gunakan status `TODO`, `IN PROGRESS`, `BLOCKED`, atau `DONE`; `DONE` hanya setelah kriteria terkait benar-benar diverifikasi. Tracker memuat template checkpoint siap salin.
 
 ## Hostless
 

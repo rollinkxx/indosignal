@@ -1,72 +1,72 @@
 # Agent Handoff: Multipair Scanner & Application Audit
 
-**Last updated:** 2026-11-04 12:15 WIB
-**Canonical repository:** `rollinkxx/indosignal`
-**Baseline verified in this workspace:** `6f34565e4314c2e3852eb569f8a408e418932546` (`main` / `origin/main`)
-**Purpose:** Durable handoff for any agent continuing the scanner, audit, or remediation work. Update this file in the same change whenever work is started, completed, verified, or blocked.
+**Last updated:** 2026-11-04 12:23 WIB
+**Repository:** `rollinkxx/indosignal`
+**Latest `main` observed:** `e2ed4fecae1a24cc442bf177213cd6bcc9a61209`
+**Purpose:** Durable work log and source of truth for agents continuing scanner, audit, or remediation. Read this before starting; update it as work progresses, not only at session end.
 
-## Operating rule for future agents
+## Start here — required protocol
 
-Treat this document and the current Git history as the source of truth; do not infer that work exists from a prior conversation or an uncommitted workspace. Before changing code, check `git status`, branch, and latest commit. After **each meaningful change**, update the relevant status here with files changed, commands run, exact results, and remaining blockers. Commit work in reviewable increments on a dedicated branch and push that branch when authorized/available so another agent can recover it after a sandbox or credit interruption. Never claim a change is complete based only on a previous agent's report; verify the current checkout.
+1. Read this file and the relevant design/runbook documents. Check `git status --short --branch`, current branch, `git log -1`, and fetch the latest `origin/main`. Do not assume a change exists because it appeared in another conversation or ephemeral workspace.
+2. Before implementing a task, create/update its row in the tracker below: set `IN PROGRESS`, record the working branch, narrow next action, and acceptance evidence. If this is a new task, add a new ID and row first. Never erase history; append dated entries to the change log.
+3. Work in small logical slices. After each meaningful slice, run the narrowest relevant test/check, update the row with files and commit SHA plus the exact command/result, then commit. Push the branch after each verified slice when remote access is available. Do not accumulate a large uncommitted batch.
+4. If context, time, or credit may run out, stop adding scope. Save the current safe state, update this file with what changed, what did not, current branch/commit, exact verification (including failures), and one concrete next action. Commit and push that checkpoint. If pushing is impossible, record the exact reason and local commit SHA so recovery is straightforward.
+5. Before handoff, check the repository again, ensure the tracker matches the tree and commit history, and summarize unresolved blockers. Use `DONE` only for the acceptance criteria actually verified; distinguish code written, tests passed, CI passed, deployment completed, and production behavior observed.
 
-Do not put credentials, secret values, production database URLs, or private key material in this file, logs, commits, or command output.
+Credit remaining is not a reliable project signal; therefore checkpoint by work slice rather than waiting for a warning that may not arrive. Never put credentials, secret values, database URLs, private keys, or sensitive production data in this file, logs, commit messages, or command output.
 
-## Current verified state
+## Status definitions and update format
 
-- The accessible clone is clean at the baseline commit above. There is no local `forensic/2026-11-04-remediation` branch/ref in this clone and no full remediation patch committed to `main`.
-- The multipair scanner is present in the repository baseline; `tests/multi-pair-universe.test.ts` is part of the baseline suite. This confirms the code/test exists, not that live provider coverage, scheduled worker operation, or production deployment has been verified.
-- Fresh baseline checks run on 2026-11-04:
-  - `corepack pnpm install --frozen-lockfile` — passed.
-  - `corepack pnpm typecheck` — passed.
-  - `corepack pnpm test` — **12 test files, 74 tests passed**.
-  - `corepack pnpm check:market-mocks` — passed (`market mock guard: clean`).
-  - `corepack pnpm check:docker-security` — passed (static checks only).
-  - `corepack pnpm build` — passed (Next.js production build).
-- These checks are for the clean baseline only. They do **not** verify previously described local remediation changes.
-- The earlier audit conversation reported that a larger set of changes was made in an ephemeral, uncommitted working tree and that its then-current tests passed (20 files / 105 tests). That working tree did not carry into this clone. Treat those changes as **not applied/not verified here** until restored, reviewed, and retested.
-- No commit, push, deployment, production DB connection, or production DB write was made in the current continuation.
+Use only these statuses:
 
-## Work queue
+- `TODO` — not started or not yet attempted in the current repository state.
+- `IN PROGRESS` — an agent has begun; include branch and immediate next action.
+- `BLOCKED` — cannot proceed without a named external dependency, access, decision, or safe test environment; specify exactly what would unblock it.
+- `DONE` — acceptance evidence exists and was verified on the recorded commit/environment. If only a subset is complete, split it into a separate row or leave the row in progress.
 
-### P0 — Recover, review, and validate the uncommitted remediation batch
+Each row must answer: what is the state; where is the work (branch/commit/files); what command or observation proves it; what happens next; and what is blocking it. Do not use “done” to mean merely “implemented”.
 
-Recover the complete patch from the previous task's saved file artifacts/history if possible. Do not cherry-pick or blindly overwrite from partial snapshots; identify exact paths and compare each file against the current baseline first. Create a feature branch and preserve the patch in Git before expanding scope. Report any files that cannot be recovered rather than reconstructing them from memory.
+## Current task tracker
 
-The prior audit described the following intended changes; they are **reported in the old audit, not verified as present in this checkout**:
+| ID | Work item | Status | Branch / commit / files | Verification evidence | Next action | Blocker |
+|---|---|---|---|---|---|---|
+| H-01 | Durable README entry and detailed handoff tracker | `DONE` | Merged by PR #4; merge commit `e2ed4fecae1a24cc442bf177213cd6bcc9a61209`; `README.md`, `docs/AGENT-HANDOFF.md` | PR #4 `CI/quality-gates` passed; PR state `MERGED` verified on 2026-11-04 | Maintain the tracker as work changes | None |
+| H-02 | Implement checkpoint protocol and status table | `IN PROGRESS` | Branch `docs/checkpoint-handoff-protocol`; update `README.md` and this file | To be recorded after docs checks/CI on this branch | Validate, commit, push, and open PR; merge after required checks pass | CI on this change pending |
+| A-01 | Recover and review the earlier uncommitted remediation batch | `TODO` | No complete patch/ref is present in the current checkout; see details below | Earlier session reported local edits, but the patch was not committed and did not carry into the current clone | Recover full patch from saved artifacts/history; compare against current `main` before applying; keep only reviewed changes | Partial snapshots are not a complete, trustworthy patch |
+| A-02 | Run multipair scanner and application baseline checks | `DONE` | Baseline code at `6f34565e4314c2e3852eb569f8a408e418932546`; scanner implementation and `tests/multi-pair-universe.test.ts` are present | Fresh run on 2026-11-04: `pnpm install --frozen-lockfile`, `pnpm typecheck`, `pnpm test` (12 files/74 tests), `pnpm check:market-mocks`, `pnpm check:docker-security`, `pnpm build` all passed | Do not infer live scanning/deployment from local tests; perform operational checks below | Live provider, production worker, and production deployment were not verified |
+| A-03 | Disposable PostgreSQL integration checks and migration validation | `BLOCKED` | No disposable/staging DB was configured in this sandbox; no production DB touched | No DB integration test has been run in this continuation | Obtain an authorized disposable/staging PostgreSQL target; run migration and proof scripts only there | Safe PostgreSQL test environment unavailable |
+| A-04 | Confirm Hostless config/deployment/readiness | `BLOCKED` | No current Hostless deployment/config evidence captured | Prior audit reported dashboard HTTP 504; current secret presence, logs, deployment and `/api/ready` remain unknown | Through authorized access, verify separately configured migrator credential, TLS/least privilege, deployment logs, and readiness without exposing secrets | Hostless status/access not verified |
+| A-05 | Production Docker image build and runtime smoke checks | `TODO` | Docker unavailable in the earlier sandbox; CI workflow/build outcome for production image not evidenced in current tracker | Static `check:docker-security` is not a Docker image build | Verify CI contains and passes an actual image build; after authorized deployment, run non-destructive health/readiness/market/scanner smoke checks | Requires Docker-capable CI and approved deployment window for production smoke checks |
+| A-06 | Independent immutable/WORM audit-chain anchor | `BLOCKED` | No external storage receipt or custody evidence in repository | Repository-local hash/snapshot cannot prove independent immutability | Obtain evidence for separate immutable destination, independent key custody, signed snapshot, and verifiable receipt | Requires operator/provider evidence |
 
-- Shared migration-version registry consistent with migration runner normalization.
-- Disposable-database guards for restart, forward-test, and multipair proof scripts; child migrator receives the disposable test URL.
-- Same-run audit-chain database constraint/migration and verifier checks.
-- Readiness check coalescing/cache and audit of runtime DB privileges.
-- Market snapshot refresh, freshness/stale-state handling, and explicit WIB formatting.
-- Backtest historical-fee and pre-tax caveats plus operational-error redaction.
-- Minimal public health response.
-- PWA service-worker registration and an offline shell that does not show stale market prices.
-- Explicit multipair warm-up probe budget and exhaustion status.
-- CI Docker image build/structure check without publishing the image.
+### Detail for A-01: prior audit's reported changes (not present/verified in this checkout)
 
-For every restored change, run the smallest relevant test first, then the complete verification suite. Record actual outputs here. Do not apply the proposed database migration to production.
+The previous audit session described a local uncommitted batch covering: shared migration-version registry; disposable-database guards in DB proof scripts; same-run audit-chain migration/verifier; readiness cache; market freshness refresh; backtest caveats and error redaction; minimal public health response; PWA offline shell; multipair warm-up budget; and Docker build checks in CI. Do not mark any of these as applied until the full change is recovered, reviewed, and present on a recorded branch/commit. Do not blindly copy partial artifact snapshots or apply a database migration to production.
 
-### P1 — Disposable PostgreSQL integration verification
+### Safe database and production rules
 
-Use only an explicitly disposable or staging PostgreSQL database. Verify migration ordering/runner behavior, `0010_same_run_event_chain.sql` (if restored), audit-chain linkage, and the DB proof scripts. Keep `TEST_DATABASE_URL` distinct from `DATABASE_URL`; ensure test scripts fail closed if that condition is not met. Never print either URL. Record the database environment type and test outcome without recording credentials.
+For DB proof scripts, require an explicitly disposable/staging target, keep `TEST_DATABASE_URL` distinct from `DATABASE_URL`, ensure scripts fail closed on unsafe targets, and never print URLs. Production Hostless checks are read-only unless a separately authorized, reviewed deployment plan explicitly says otherwise. Do not substitute `DATABASE_URL` for `MIGRATION_DATABASE_URL`, change production secrets, or trigger a deployment just to clear this tracker.
 
-### P1 — Hostless production state and deployment
+## Copyable checkpoint template
 
-The previous audit could not determine current Hostless status (dashboard had returned HTTP 504). Check the actual deployment and readiness only through authorized access. Verify that `MIGRATION_DATABASE_URL` is configured separately from the runtime `DATABASE_URL`, TLS is enabled, and migrator privileges are appropriate—without exposing values. Inspect deployment/migration logs and `/api/ready`. Do not modify production configuration or trigger a deployment without a clear, authorized operational plan. Until verified, production status is **unknown**, not healthy or recovered.
+Append a dated entry after each meaningful slice and update the corresponding task row above:
 
-### P2 — Docker CI and production smoke checks
+```markdown
+### YYYY-MM-DD HH:MM TZ — <task ID> — <short checkpoint>
+- Status: IN PROGRESS | BLOCKED | DONE
+- Branch / commit: `<branch>` / `<sha>`
+- Changed files: `<paths>`
+- Verification: `<exact command or observation>` — `<result/count>`
+- Not verified: `<remaining proof boundary>`
+- Next action: `<one concrete action>`
+- Blocker: `<none or exact dependency>`
+```
 
-Docker was unavailable in the sandbox. Confirm the CI workflow on GitHub builds the production image and validates its non-root runtime structure. A static Docker security script is not equivalent to a Docker build. After an approved deployment, run non-destructive smoke checks for health/readiness, market endpoints, and scanner status; record URL/environment and timestamp, not secrets.
+## Completion criteria for scanner/audit remediation
 
-### P2 — Independent immutable audit-chain anchor
+Call the overall scanner/audit task complete only when each relevant tracker row is separately resolved: recovered remediation is reviewed and committed; typecheck, full tests, static checks, production build, and required CI pass on the recorded change; disposable/staging DB integration passes; an actual Docker production image build passes; current Hostless configuration/deployment/readiness has evidence; and any residual WORM/anchor limitation is evidenced or explicitly accepted. A local build or green documentation PR is not proof of production recovery.
 
-Repository-local hashes/snapshots alone do not demonstrate resistance to a privileged database administrator. Confirm the external WORM/immutable storage destination, independent key custody, signed snapshot, and verifiable receipt with the operator. Do not claim independent tamper resistance until evidence exists.
+## Change log
 
-## Completion criteria
-
-The audit/remediation can be called complete only when: (1) the recovered patch is reviewed and committed; (2) typecheck, full unit tests, static checks, and production build pass on that exact commit; (3) disposable/staging DB integration checks pass; (4) Docker CI passes; (5) Hostless configuration/deployment/readiness have current evidence; and (6) unresolved WORM/anchor limitations are either evidenced or explicitly recorded as an accepted residual risk. Report each criterion separately. Do not equate a passing local build with production recovery.
-
-## Handoff change log
-
-- 2026-11-04 12:15 WIB — Added a concise status entry and a prominent link to this document in the root `README.md`; the detailed tracker remains the source of truth for task status and verification evidence.
+- 2026-11-04 12:15 WIB — Added the initial detailed handoff and linked it from README (PR #4, merged as `e2ed4fe`).
+- 2026-11-04 12:23 WIB — Implementing the required per-slice checkpoint protocol, explicit status definitions, actionable task table, and copyable checkpoint template on branch `docs/checkpoint-handoff-protocol`.
