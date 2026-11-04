@@ -13,8 +13,8 @@ For implementation or operational configuration changes, CI requires an added or
 
 ## Verification evidence
 
-- Commands / checks and exact result:
-- CI status / run:
+- Commands / checks: exact command, result, and test count where applicable:
+- CI: required check name/status, run URL or ID, and evaluated head SHA:
 - Not verified (deployment, database, live behavior, or other boundary):
 
 ## Resume point
