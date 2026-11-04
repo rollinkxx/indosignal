@@ -1,9 +1,19 @@
 # Agent Handoff: Multipair Scanner & Application Audit
 
-**Last updated:** 2026-11-04 12:26 WIB
+**Last updated:** 2026-11-04 12:36 WIB
 **Repository:** `rollinkxx/indosignal`
-**Latest `main` observed:** `8fb15b74df96d80baf93618cbfe9cbb26c8c6d23`
+**Latest `main` observed:** `717db83bdfb2a79c4d3df02f80d5b11e1ea2c81a`
 **Purpose:** Durable work log and source of truth for agents continuing scanner, audit, or remediation. Read this before starting; update it as work progresses, not only at session end.
+
+## Resume snapshot — reconcile with Git before acting
+
+**Last reconciled:** 2026-11-04 12:35 WIB against `origin/main` at `717db83`.
+**Current documentation task:** H-03, `IN PROGRESS`, branch `docs/agent-resume-system`, checkpoint `44994c2d1117495f023e292326644b121a9809d9`; adds always-read repo instructions, a copyable resume prompt, PR checklist, and this snapshot.
+**Immediate next action:** Push the checkpoint, open PR, wait for CI, and merge only if checks pass. Then update H-03 with the final PR/merge evidence.
+**Existing application work priority after H-03:** A-01 is still `TODO`. Recover the full prior uncommitted remediation patch and compare it with current Git before editing; do not assume it exists in this checkout.
+**Last known code verification:** Baseline commit `6f34565e4314c2e3852eb569f8a408e418932546` passed typecheck, 12 test files / 74 tests, static market-mock and Docker-security checks, and production build on 2026-11-04. That evidence does not prove live provider, production, DB, or Docker image behavior.
+**Known blockers:** No disposable/staging PostgreSQL target, current Hostless configuration/deployment evidence, or external WORM receipt is recorded. See A-03 through A-06 below.
+**Conversation handoff:** Use `docs/AGENT-RESUME-TEMPLATE.md` for a prior-session link. Read that history for intent/decisions only, then reconcile every status/claim against Git, CI, and this tracker.
 
 ## Start here — required protocol
 
@@ -32,6 +42,7 @@ Each row must answer: what is the state; where is the work (branch/commit/files)
 |---|---|---|---|---|---|---|
 | H-01 | Durable README entry and detailed handoff tracker | `DONE` | Merged by PR #4; merge commit `e2ed4fecae1a24cc442bf177213cd6bcc9a61209`; `README.md`, `docs/AGENT-HANDOFF.md` | PR #4 `CI/quality-gates` passed; PR state `MERGED` verified on 2026-11-04 | Maintain the tracker as work changes | None |
 | H-02 | Implement checkpoint protocol and status table | `DONE` | PR #5; merge commit `8fb15b74df96d80baf93618cbfe9cbb26c8c6d23`; `README.md`, `docs/AGENT-HANDOFF.md` | PR #5 `CI/quality-gates` passed; GitHub state `MERGED`; `origin/main` advanced to the recorded merge commit on 2026-11-04 | Follow the protocol for all future work and keep the task tracker current | None |
+| H-03 | Make context recovery robust across conversations and credit interruptions | `IN PROGRESS` | Branch `docs/agent-resume-system`; commit `44994c2d1117495f023e292326644b121a9809d9`; `AGENTS.md`, `README.md`, `.github/pull_request_template.md`, `docs/AGENT-HANDOFF.md`, `docs/AGENT-RESUME-TEMPLATE.md` | On commit `44994c2`, `git diff --check` passed; scripted presence/reference checks for all four entry/template files passed; staged diff check passed | Push branch, open PR, await CI, then record PR/merge evidence | PR/CI pending |
 | A-01 | Recover and review the earlier uncommitted remediation batch | `TODO` | No complete patch/ref is present in the current checkout; see details below | Earlier session reported local edits, but the patch was not committed and did not carry into the current clone | Recover full patch from saved artifacts/history; compare against current `main` before applying; keep only reviewed changes | Partial snapshots are not a complete, trustworthy patch |
 | A-02 | Run multipair scanner and application baseline checks | `DONE` | Baseline code at `6f34565e4314c2e3852eb569f8a408e418932546`; scanner implementation and `tests/multi-pair-universe.test.ts` are present | Fresh run on 2026-11-04: `pnpm install --frozen-lockfile`, `pnpm typecheck`, `pnpm test` (12 files/74 tests), `pnpm check:market-mocks`, `pnpm check:docker-security`, `pnpm build` all passed | Do not infer live scanning/deployment from local tests; perform operational checks below | Live provider, production worker, and production deployment were not verified |
 | A-03 | Disposable PostgreSQL integration checks and migration validation | `BLOCKED` | No disposable/staging DB was configured in this sandbox; no production DB touched | No DB integration test has been run in this continuation | Obtain an authorized disposable/staging PostgreSQL target; run migration and proof scripts only there | Safe PostgreSQL test environment unavailable |
@@ -71,3 +82,4 @@ Call the overall scanner/audit task complete only when each relevant tracker row
 - 2026-11-04 12:15 WIB — Added the initial detailed handoff and linked it from README (PR #4, merged as `e2ed4fe`).
 - 2026-11-04 12:24 WIB — Committed and pushed checkpoint protocol, explicit statuses, task table, template, and README start instructions as `3318452`; documentation checks passed locally; CI/PR pending.
 - 2026-11-04 12:26 WIB — PR #5 quality-gates passed and the checkpoint protocol was merged; main merge commit `8fb15b7`. H-02 marked `DONE` with verified evidence.
+- 2026-11-04 12:36 WIB — H-03 checkpoint `44994c2` adds root agent instructions, a resume snapshot, copyable conversation-link prompt, and PR checklist; scripted documentation/reference checks and `git diff --check` passed. PR/CI pending.
