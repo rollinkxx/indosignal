@@ -33,17 +33,18 @@
 
 **Files:**
 - Create: `scripts/check-handoff-update.mjs`
+- Create: `scripts/check-handoff-update.d.mts`
 - Create: `tests/handoff-update-check.test.ts`
 
 **Interfaces:**
 - Produces `checkHandoffCoverage(changedFiles, handoffDiff)` for unit tests and a CLI accepting `<base-sha> <head-sha>`.
 - The CLI reads the full changed-file list (including deletions) and zero-context handoff diff between base/head; it exits non-zero for implementation/config changes unless an added handoff row matches `+| TASK-ID |`.
 
-- [ ] **Step 1: Add failing unit tests** for: (a) app source without tracker fails; (b) app source plus only a timestamp/cosmetic tracker diff fails; (c) app source plus an added/edited task row passes; (d) README/docs-only changes pass without tracker; (e) `package.json`, `Dockerfile`, and `.github/workflows/ci.yml` without a task-row update fail; (f) empty file list passes.
+- [ ] **Step 1: Add failing tests** for: (a) app source without tracker fails; (b) timestamp/cosmetic tracker diff fails; (c) added/edited task row passes; (d) docs-only diff passes; (e) config paths require a row; (f) empty list passes; (g) invalid SHAs and unavailable Git fail closed; (h) a real temporary Git PR diff rejects source-only changes and accepts a task-row update when `color.ui=always`.
 - [ ] **Step 2: Run focused tests** with `corepack pnpm exec vitest run tests/handoff-update-check.test.ts`; confirm they fail because the checker module is absent.
 - [ ] **Step 3: Implement the smallest pure classifier** with explicit implementation/config roots and critical root files; normalize path separators; detect `docs/AGENT-HANDOFF.md`; require an added diff line matching `/^\+\|\s*[A-Z][A-Z0-9]*-\d+\s*\|/`; and return `required`, `covered`, and an actionable `reason`.
-- [ ] **Step 4: Implement the CLI**: require exactly two 40-character hexadecimal SHAs; run both the full changed-file `git diff --name-only` and `git diff --unified=0 -- docs/AGENT-HANDOFF.md`; print the decision; fail on invalid input, Git errors, or uncovered implementation changes; do not print environment variables or secret values.
-- [ ] **Step 5: Re-run the focused tests** and require all cases to pass.
+- [ ] **Step 4: Implement the CLI**: require exactly two 40-character hexadecimal SHAs; run the full changed-file `git diff --name-only` and `git diff --no-color --unified=0 -- docs/AGENT-HANDOFF.md`; print the decision; fail on invalid input, Git errors, or uncovered implementation changes; do not print environment variables or secret values.
+- [ ] **Step 5: Re-run `corepack pnpm exec vitest run tests/handoff-update-check.test.ts`** and require all 11 tests to pass.
 - [ ] **Step 6: Commit this slice** as `test: enforce handoff coverage rules` after updating the tracker row with the test result.
 
 ### Task 2: Wire the checker into package scripts and pull-request CI
@@ -80,7 +81,7 @@
 
 ## Acceptance
 
-- Unit tests cover all six review-focus cases and pass, including a failing cosmetic-only tracker edit.
+- Unit/integration tests cover the policy, CLI validation/failure paths, and forced-color Git integration; all 11 focused tests pass.
 - CLI fails closed on invalid input/Git errors and reports an uncovered code/config diff non-zero.
 - CI runs the gate on PRs and passes this PR because H-04 has a real task-row update; a cosmetic tracker touch alone cannot pass.
 - README, AGENTS, PR template, and handoff accurately distinguish automated enforcement from convention.
@@ -88,4 +89,4 @@
 
 ## Execution Handoff
 
-Review this plan before implementation. Task 1, Task 2, and Task 3 are sequential: the classifier/tests define the policy, CI wires it, and docs explain it. No deployment or production-data access is in scope.
+User approved this plan on 2026-11-04. Task 1, Task 2, and Task 3 are sequential: the classifier/tests define the policy, CI wires it, and docs explain it. No deployment or production-data access is in scope.
