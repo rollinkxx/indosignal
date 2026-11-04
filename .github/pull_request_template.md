@@ -26,3 +26,5 @@ For implementation or operational configuration changes, CI requires an added or
 - [ ] No credentials, tokens, database URLs, or private operational values included.
 - [ ] I distinguished code changes, local tests, CI, deployment, and production verification.
 - [ ] If this is a continuation, I checked the repo state against the conversation and did not repeat verified work.
+
+Before merge, verify the PR's required checks, required reviews, and branch-protection rules on GitHub. Do not treat a green CI run or successful commit as approval, and never bypass a repository control.

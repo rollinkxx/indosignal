@@ -4,10 +4,11 @@ This repository is the durable source of truth. A conversation link is supplemen
 
 ## Before work
 
-1. Read `README.md`, this file, and the **Resume snapshot** plus task tracker in `docs/AGENT-HANDOFF.md`.
+1. Read `README.md`, `TODO.md`, this file, `docs/AGENT-RESUME-TEMPLATE.md`, and the **Resume snapshot** plus relevant tracker row in `docs/AGENT-HANDOFF.md`. Follow any additional repository documents referenced by those instructions.
 2. Run `git fetch origin`, `git status --short --branch`, and inspect the current commit. Reconcile the snapshot with the actual checkout. If it is stale, update it before doing substantive work.
 3. If a previous conversation is attached, read it for requirements, constraints, and decisions. Verify every claimed change against the current branch/commit; do not repeat completed, verified work or blindly copy partial patches.
-4. Set the relevant tracker row to `IN PROGRESS` before implementation. For a new task, add an ID, scope, acceptance evidence, and next action first.
+4. Check the default branch, latest remote main, open PR/review/CI state, required checks, and branch protection before changing or merging work. Continue only the earliest unfinished task in the declared sequence.
+5. Set the relevant tracker row to `IN PROGRESS` before implementation. For a new task, add an ID, scope, acceptance evidence, branch, and one concrete next action first.
 
 ## While working and when handing off
 
