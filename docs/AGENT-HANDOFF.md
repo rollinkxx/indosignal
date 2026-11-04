@@ -1,6 +1,6 @@
 # Agent Handoff: Multipair Scanner & Application Audit
 
-**Last updated:** 2026-11-04 12:12 WIB
+**Last updated:** 2026-11-04 12:15 WIB
 **Canonical repository:** `rollinkxx/indosignal`
 **Baseline verified in this workspace:** `6f34565e4314c2e3852eb569f8a408e418932546` (`main` / `origin/main`)
 **Purpose:** Durable handoff for any agent continuing the scanner, audit, or remediation work. Update this file in the same change whenever work is started, completed, verified, or blocked.
@@ -66,3 +66,7 @@ Repository-local hashes/snapshots alone do not demonstrate resistance to a privi
 ## Completion criteria
 
 The audit/remediation can be called complete only when: (1) the recovered patch is reviewed and committed; (2) typecheck, full unit tests, static checks, and production build pass on that exact commit; (3) disposable/staging DB integration checks pass; (4) Docker CI passes; (5) Hostless configuration/deployment/readiness have current evidence; and (6) unresolved WORM/anchor limitations are either evidenced or explicitly recorded as an accepted residual risk. Report each criterion separately. Do not equate a passing local build with production recovery.
+
+## Handoff change log
+
+- 2026-11-04 12:15 WIB — Added a concise status entry and a prominent link to this document in the root `README.md`; the detailed tracker remains the source of truth for task status and verification evidence.
