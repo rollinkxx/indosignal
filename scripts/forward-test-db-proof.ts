@@ -6,11 +6,11 @@ import { fileURLToPath } from 'node:url';
 import { ForwardTestRepository, type ForwardTestConfig } from '../lib/forward-test/repository';
 import { getDbPool } from '../lib/db/client';
 import type { ClosedCandle, Fill } from '../lib/paper/types';
+import { applyDisposableRuntimeDatabase, resolveDisposableDatabaseTargets } from './disposable-database.mjs';
 
 const scriptPath = fileURLToPath(import.meta.url);
 const mode = process.argv[2];
 const campaignKey = process.env.FORWARD_TEST_CAMPAIGN_KEY;
-const testDbUrl = process.env.DATABASE_URL;
 const repository = new ForwardTestRepository();
 
 const config: ForwardTestConfig = {
@@ -172,17 +172,18 @@ async function verifyAfterRestart(): Promise<void> {
 }
 
 async function main(): Promise<void> {
+  const targets = resolveDisposableDatabaseTargets(process.env, { requireMigration: true });
+  if (mode === 'seed' || mode === 'verify') applyDisposableRuntimeDatabase(process.env, { requireMigration: true });
   if (mode === 'seed') return seed();
   if (mode === 'verify') return verifyAfterRestart();
+  if (mode !== undefined) throw new Error('Mode proof forward-test tidak dikenal.');
 
-  if (!process.env.TEST_DATABASE_URL) throw new Error('Set TEST_DATABASE_URL to a disposable local PostgreSQL database; production DATABASE_URL is intentionally not accepted.');
   const env = {
     ...process.env,
     NODE_ENV: 'test' as const,
-    DATABASE_URL: process.env.TEST_DATABASE_URL,
-    DATABASE_SSL: process.env.TEST_DATABASE_SSL ?? 'disable',
     FORWARD_TEST_CAMPAIGN_KEY: `restart-proof:${randomUUID()}`,
   };
+  if (!targets.testMigrationDatabaseUrl) throw new Error('TEST_MIGRATION_DATABASE_URL wajib untuk proof forward-test.');
   runProcess(['scripts/migrate.mjs'], env);
   const file = resolve(scriptPath);
   runProcess(['--import', 'tsx', file, 'seed'], env);
