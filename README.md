@@ -24,9 +24,9 @@ corepack pnpm build
 
 ## Status & handoff agen
 
-Sebelum mulai mengubah kode, agen wajib membaca [tracker handoff](docs/AGENT-HANDOFF.md), memeriksa branch/working tree/commit terbaru, lalu mencatat pekerjaan sebagai `IN PROGRESS` beserta langkah berikutnya dan bukti selesai yang dibutuhkan. Tracker adalah sumber kebenaran status dan blocker; ringkasan percakapan saja bukan bukti perubahan ada di repo.
+Sebelum mengubah kode, baca [instruksi agen](AGENTS.md), lalu [resume snapshot dan tracker handoff](docs/AGENT-HANDOFF.md); periksa branch, working tree, commit, dan CI aktual sebelum melanjutkan. Repo/Git adalah sumber kebenaran untuk apa yang sudah dikerjakan—tautan percakapan hanya konteks untuk intent dan keputusan.
 
-Setelah tiap unit kerja bermakna, agen harus menjalankan pemeriksaan relevan, mencatat path/hasil persis/commit dan langkah selanjutnya di tracker, lalu membuat commit kecil dan push checkpoint bila tersedia. Jika konteks atau kredit menipis, hentikan scope baru dan simpan status serta blocker sebelum berhenti. Gunakan status `TODO`, `IN PROGRESS`, `BLOCKED`, atau `DONE`; `DONE` hanya setelah kriteria terkait benar-benar diverifikasi. Tracker memuat template checkpoint siap salin.
+Untuk meneruskan pekerjaan dari percakapan sebelumnya, gunakan [template prompt resume](docs/AGENT-RESUME-TEMPLATE.md): sertakan tautan percakapan, tetapi minta agen merekonsiliasi klaim lama dengan branch/commit/tracker agar tidak mengulang pekerjaan yang sudah terverifikasi. Setelah tiap unit kerja bermakna, catat bukti, SHA, batas verifikasi, langkah berikutnya, dan blocker di tracker; commit/push checkpoint. Jangan menunggu peringatan kredit—checkpoint di setiap milestone, terutama sebelum berhenti atau berganti agen. PR memakai [.github/pull_request_template.md](.github/pull_request_template.md) untuk memeriksa status dan bukti handoff.
 
 ## Hostless
 
