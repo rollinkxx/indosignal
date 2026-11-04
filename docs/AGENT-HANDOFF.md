@@ -1,6 +1,6 @@
 # Agent Handoff: Multipair Scanner & Application Audit
 
-**Last updated:** 2026-11-04 17:42 WIB
+**Last updated:** 2026-11-04 17:47 WIB
 **Repository:** `rollinkxx/indosignal`
 **Latest `main` observed:** `8641f104f81506125d4f7f87e4f5b88bb4e75f57`
 **Purpose:** Durable work log and source of truth for agents continuing scanner, audit, or remediation. Read this before starting; update it as work progresses, not only at session end.
@@ -8,8 +8,8 @@
 ## Resume snapshot — reconcile with Git before acting
 
 **Last reconciled:** 2026-11-04 17:42 WIB against `origin/main` at `8641f104f81506125d4f7f87e4f5b88bb4e75f57`.
-**Current focus:** M-02, `IN PROGRESS`, branch `docs/M-02-sync-agent-resume`, latest implementation commit `f4033f0`; synchronize resume instructions and recovery references across repository guidance.
-**Immediate next action:** Push `f4033f0` and open the M-02 documentation PR.
+**Current focus:** M-02, `IN PROGRESS`, PR #11, branch `docs/M-02-sync-agent-resume`, implementation `f4033f0`, latest checkpoint `43cb0a1`; synchronize resume instructions and recovery references across repository guidance.
+**Immediate next action:** Verify CI/review requirements on PR #11, then merge only if all repository requirements pass.
 **Next application priority after agent-workflow tasks:** A-01 remains `TODO`: recover and review the prior uncommitted remediation patch; no A-01 code edits are in progress.
 **Last known verification:** M-02 `git diff --check` and snapshot/template grep consistency checks passed before commit `f4033f0`; docs-only changes have no dedicated test suite. PR #10 CI `41815214824` succeeded (`pnpm typecheck`, `pnpm test`: 13 files / 85 tests, market-mock/Docker checks, production build, dependency audit); post-merge `main` CI `41815564475` succeeded. M-02 PR CI remains pending. No live provider, production, DB, or Docker image behavior is claimed.
 **Known blockers:** No disposable/staging PostgreSQL target, current Hostless configuration/deployment evidence, or external WORM receipt is recorded. See A-03 through A-06 below.
@@ -45,7 +45,7 @@ Each row must answer: what is the state; where is the work (branch/commit/files)
 | H-03 | Make context recovery robust across conversations and credit interruptions | `DONE` | PR #7; implementation commit `44994c2`; merge commit `d3226acaf24b9ba3a3eb933aeaf5615557e53e8f`; `AGENTS.md`, `README.md`, `.github/pull_request_template.md`, `docs/AGENT-HANDOFF.md`, `docs/AGENT-RESUME-TEMPLATE.md` | Scripted file/reference checks and `git diff --check` passed; PR #7 `CI/quality-gates` passed; GitHub state `MERGED` and `origin/main` verified on 2026-11-04 | Apply these instructions on every continuation; resume A-01 from snapshot above | None |
 | H-04 | Enforce tracker updates for implementation/configuration PRs | `DONE` | PR #9 (`ci/require-handoff-on-code-pr`); implementation `63cd0a830312845d136de5f6e5e31ca1c82c77d4`; PR head `b464484ccd18b4f1f7d66785a9f590b6396c24bc`; merge `1ebce0352d0b70dbfd95b81b71eacbc6c38e4022` | PR run `41782005671`, follow-up PR run `41782234982`, and `main` push run `41782348083` succeeded; PR state `MERGED` verified | Preserve the gate; next application priority is A-01 after M-series | None |
 | M-01 | Reconcile H-04 and PR #9 evidence | `DONE` | PR #10; branch `chore/M-01-reconcile-h04-pr9`; commit `4ebe50afbeb6baabdbd14d684001e8fb81762000`; merge `8641f104f81506125d4f7f87e4f5b88bb4e75f57` | PR #10 merged; CI `41815214824` and post-merge main CI `41815564475` success; `git diff --check` passed | Continue to M-02 | None |
-| M-02 | Synchronize resume snapshot and handoff workflow | `IN PROGRESS` | `docs/M-02-sync-agent-resume`; commit `f4033f0`; `README.md`, `AGENTS.md`, `.github/pull_request_template.md`, `docs/AGENT-RESUME-TEMPLATE.md`, `docs/AGENT-HANDOFF.md` | `git diff --check` and `grep` checks of snapshot/template fields passed; M-01 PR #10 CI passed (13 files / 85 tests). M-02 CI pending. | Push commit and open the documentation PR | None |
+| M-02 | Synchronize resume snapshot and handoff workflow | `IN PROGRESS` | PR #11, branch `docs/M-02-sync-agent-resume`; implementation `f4033f0`, checkpoint `43cb0a1`; README, AGENTS, PR template, resume template, handoff | `git diff --check` and snapshot/template `grep` checks passed; PR #10 CI passed (13 files / 85 tests). PR #11 CI pending. | Verify PR #11 checks/reviews and merge when all requirements pass | None |
 | M-03 | Document `AWAITING APPROVAL` status and transitions | `TODO` | Not started | Pending | Add formal status consistently | None |
 | M-04 | Strengthen handoff checker and CI | `TODO` | Not started | Existing checker/gate reviewed as baseline | Audit actual repo coverage and add deterministic tests | None |
 | M-05 | Standardize task reporting | `TODO` | Not started | Pending | Extend existing template without duplication | None |
@@ -103,3 +103,4 @@ Call the overall scanner/audit task complete only when each relevant tracker row
 - 2026-11-04 12:55 WIB — PR #9 run `41782005671` passed all checks; the new named handoff task-row gate ran and succeeded at head `bc48689`. Next merge PR #9 and record the final merge SHA.
 - 2026-11-04 17:31 WIB — M-01 reconciliation started on `chore/M-01-reconcile-h04-pr9`. Fresh GitHub verification: PR #9 merged (implementation branch `ci/require-handoff-on-code-pr`, PR head `b464484ccd18b4f1f7d66785a9f590b6396c24bc`, merge SHA `1ebce0352d0b70dbfd95b81b71eacbc6c38e4022`); PR run `41782005671`, subsequent PR run `41782234982`, and `main` run `41782348083` succeeded. H-04 is now `DONE`; M-01 PR remains in progress. A-01 stays `TODO` as the next application task after M-series. No deployment claim is made.
 - 2026-11-04 17:42 WIB — M-01 completed: PR #10 merged as `8641f104f81506125d4f7f87e4f5b88bb4e75f57`; PR CI `41815214824` and post-merge main CI `41815564475` succeeded. Started M-02 on `docs/M-02-sync-agent-resume` from that main SHA; synchronizing repository recovery guidance. A-01 remains the next application priority after M-series.
+- 2026-11-04 17:47 WIB — M-02 documentation changes committed (`f4033f0` plus handoff checkpoint `43cb0a1`) and PR #11 opened. Local `git diff --check` and snapshot/template grep checks passed. PR CI is pending; next verify required checks/reviews and merge only if permitted.
