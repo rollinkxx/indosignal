@@ -82,7 +82,7 @@ function runCli() {
 
   try {
     const range = `${baseSha}...${headSha}`;
-    const changedOutput = execFileSync('git', ['diff', '--name-only', range], { encoding: 'utf8' });
+    const changedOutput = execFileSync('git', ['diff', '--name-only', '--no-renames', range], { encoding: 'utf8' });
     const changedFiles = changedOutput.split(/\r?\n/).filter(Boolean);
     const handoffDiff = execFileSync('git', ['diff', '--no-color', '--unified=0', range, '--', HANDOFF_PATH], { encoding: 'utf8' });
     const result = checkHandoffCoverage(changedFiles, handoffDiff);

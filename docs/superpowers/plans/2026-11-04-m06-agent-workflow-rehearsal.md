@@ -40,12 +40,12 @@
 - Consumes: `checkHandoffCoverage(changedFiles, handoffDiff)` and the CLI `<40-char-base-sha> <40-char-head-sha>`.
 - Produces: CLI diff-path enumeration that includes both old and new paths for a rename, with the same exit-code contract.
 
-- [ ] Add a temporary-repository regression test that renames `app/route.ts` to `docs/route.md` without a task-row update; assert checker exit code `1` and an implementation-path coverage error.
-- [ ] Run `pnpm exec vitest run tests/handoff-update-check.test.ts`; confirm the rename test fails against current `git diff --name-only` behavior.
-- [ ] Add a deletion regression test for `app/route.ts` without a handoff row; assert checker exit code `1`.
-- [ ] Change CLI changed-path collection to `git diff --name-only --no-renames <range>` so source and destination paths remain visible.
-- [ ] Run the focused tests and assert rename, deletion, existing missing-handoff, cosmetic-only, valid-row, invalid-SHA, missing-Git-context, and colored-output cases pass.
-- [ ] Run `git diff --check` and record this discovered false-success gap in the M-06 tracker/evidence.
+- [x] Add a temporary-repository regression test that renames `app/route.ts` to `docs/route.md` without a task-row update; assert checker exit code `1` and an implementation-path coverage error.
+- [x] Run `pnpm exec vitest run tests/handoff-update-check.test.ts`; confirm the rename test fails against current `git diff --name-only` behavior (1 failed, 19 skipped; checker incorrectly returned `0`).
+- [x] Add a deletion regression test for `app/route.ts` without a handoff row; assert checker exit code `1`.
+- [x] Change CLI changed-path collection to `git diff --name-only --no-renames <range>` so source and destination paths remain visible.
+- [x] Run the focused tests and assert rename, deletion, existing missing-handoff, cosmetic-only, valid-row, invalid-SHA, missing-Git-context, and colored-output cases pass (20/20).
+- [x] Run `git diff --check` and record this discovered false-success gap in the M-06 tracker/evidence.
 
 ### Task 2: Rehearse the six workflow scenarios in isolated fixtures
 
