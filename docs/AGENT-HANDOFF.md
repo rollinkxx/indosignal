@@ -1,18 +1,18 @@
 # Agent Handoff: Multipair Scanner & Application Audit
 
-**Last updated:** 2026-11-04 17:52 WIB
+**Last updated:** 2026-11-04 17:59 WIB
 **Repository:** `rollinkxx/indosignal`
-**Latest `main` observed:** `8641f104f81506125d4f7f87e4f5b88bb4e75f57`
+**Latest `main` observed:** `0564d60cd8024b371caf60af2d804f6e2e8001b5`
 **Purpose:** Durable work log and source of truth for agents continuing scanner, audit, or remediation. Read this before starting; update it as work progresses, not only at session end.
 
 ## Resume snapshot — reconcile with Git before acting
 
-**Last reconciled:** 2026-11-04 17:42 WIB against `origin/main` at `8641f104f81506125d4f7f87e4f5b88bb4e75f57`.
-**Current focus:** M-02, `BLOCKED`, PR #11, branch `docs/M-02-sync-agent-resume`, implementation `f4033f0`, latest pushed checkpoint `8106d2916ce1d00e75fbd90b6c576c88dc3a2a85`; documentation is ready but GitHub reports a merge already in progress.
-**Immediate next action:** Recheck PR #11 and repository merge controls; retry the normal merge only after GitHub clears the in-progress merge lock.
+**Last reconciled:** 2026-11-04 17:56 WIB against `origin/main` at `0564d60cd8024b371caf60af2d804f6e2e8001b5`.
+**Current focus:** M-03, `IN PROGRESS`, PR #12, branch `docs/M-03-awaiting-approval-status`, implementation `4409bb4`, checkpoint `2faad1f`; formalize approval-wait status and transitions.
+**Immediate next action:** Verify PR #12 CI/review requirements, then merge only if all repo controls pass.
 **Next application priority after agent-workflow tasks:** A-01 remains `TODO`: recover and review the prior uncommitted remediation patch; no A-01 code edits are in progress.
-**Last known verification:** M-02 `git diff --check` and snapshot/template `grep` checks passed; PR #11 quality-gates run `41816567695` succeeded at head `8106d2916ce1d00e75fbd90b6c576c88dc3a2a85`. PR remains `OPEN`, `mergeStateStatus: CLEAN`, `reviewDecision` empty. Standard GitHub merge and REST `PUT /pulls/11/merge` returned `HTTP 405: Merge already in progress`; do not bypass. M-01 CI `41815214824` passed 13 files / 85 tests and all configured checks; its post-merge run `41815564475` succeeded.
-**Known blockers:** PR #11 merge operation is locked/in progress at GitHub despite successful checks; repository owner/GitHub must resolve the in-progress merge operation before retrying normally. For the application backlog, no disposable/staging PostgreSQL target, current Hostless deployment evidence, or external WORM receipt is recorded (A-03 through A-06).
+**Last known verification:** M-03 `git diff --check` and status consistency `grep` checks across handoff, resume template, AGENTS, README, and PR template passed before commit `4409bb4`; M-03 CI pending. M-02 PR CI `41817157589` succeeded (13 files / 85 tests; typecheck, static gates, build, audit) and post-merge `main` CI `41817396993` succeeded. These checks do not prove production behavior.
+**Known blockers:** No blocker for M-series workflow work. Application backlog still lacks a disposable/staging PostgreSQL target, current Hostless deployment evidence, and external WORM receipt (A-03 through A-06).
 **Conversation handoff:** Use `docs/AGENT-RESUME-TEMPLATE.md` for a prior-session link. Read that history for intent/decisions only, then reconcile every status/claim against Git, CI, and this tracker.
 
 ## Start here — required protocol
@@ -32,7 +32,20 @@ Use only these statuses:
 - `TODO` — not started or not yet attempted in the current repository state.
 - `IN PROGRESS` — an agent has begun; include branch and immediate next action.
 - `BLOCKED` — cannot proceed without a named external dependency, access, decision, or safe test environment; specify exactly what would unblock it.
+- `AWAITING APPROVAL` — acceptance evidence is ready for review, but a required human review/approval has not yet been recorded.
 - `DONE` — acceptance evidence exists and was verified on the recorded commit/environment. If only a subset is complete, split it into a separate row or leave the row in progress.
+
+Allowed status transitions:
+
+- `TODO` → `IN PROGRESS` when work starts and its branch/scope/next action are recorded.
+- `IN PROGRESS` → `BLOCKED` when a named dependency prevents safe progress.
+- `IN PROGRESS` → `AWAITING APPROVAL` when implementation and acceptance evidence are ready and required review is pending.
+- `BLOCKED` → `IN PROGRESS` when the recorded blocker is resolved.
+- `BLOCKED` → `TODO` only when the task is canceled and the reason is recorded.
+- `AWAITING APPROVAL` → `IN PROGRESS` when reviewers request revisions; update the same task rather than creating a duplicate.
+- `AWAITING APPROVAL` → `DONE` only after required approval is recorded and acceptance criteria are met.
+
+CI green is not approval. A successful commit or open PR does not make a task `DONE`. Deployment has a separate approval process. If a required review is absent, keep the status `AWAITING APPROVAL`. The handoff checker only detects a changed task row for implementation/configuration PRs; it does not validate status meaning, relevance, verification evidence, or truth of claims.
 
 Each row must answer: what is the state; where is the work (branch/commit/files); what command or observation proves it; what happens next; and what is blocking it. Do not use “done” to mean merely “implemented”.
 
@@ -45,8 +58,8 @@ Each row must answer: what is the state; where is the work (branch/commit/files)
 | H-03 | Make context recovery robust across conversations and credit interruptions | `DONE` | PR #7; implementation commit `44994c2`; merge commit `d3226acaf24b9ba3a3eb933aeaf5615557e53e8f`; `AGENTS.md`, `README.md`, `.github/pull_request_template.md`, `docs/AGENT-HANDOFF.md`, `docs/AGENT-RESUME-TEMPLATE.md` | Scripted file/reference checks and `git diff --check` passed; PR #7 `CI/quality-gates` passed; GitHub state `MERGED` and `origin/main` verified on 2026-11-04 | Apply these instructions on every continuation; resume A-01 from snapshot above | None |
 | H-04 | Enforce tracker updates for implementation/configuration PRs | `DONE` | PR #9 (`ci/require-handoff-on-code-pr`); implementation `63cd0a830312845d136de5f6e5e31ca1c82c77d4`; PR head `b464484ccd18b4f1f7d66785a9f590b6396c24bc`; merge `1ebce0352d0b70dbfd95b81b71eacbc6c38e4022` | PR run `41782005671`, follow-up PR run `41782234982`, and `main` push run `41782348083` succeeded; PR state `MERGED` verified | Preserve the gate; next application priority is A-01 after M-series | None |
 | M-01 | Reconcile H-04 and PR #9 evidence | `DONE` | PR #10; branch `chore/M-01-reconcile-h04-pr9`; commit `4ebe50afbeb6baabdbd14d684001e8fb81762000`; merge `8641f104f81506125d4f7f87e4f5b88bb4e75f57` | PR #10 merged; CI `41815214824` and post-merge main CI `41815564475` success; `git diff --check` passed | Continue to M-02 | None |
-| M-02 | Synchronize resume snapshot and handoff workflow | `BLOCKED` | PR #11, branch `docs/M-02-sync-agent-resume`; implementation `f4033f0`, latest pushed handoff checkpoint `8106d29`; README, AGENTS, PR template, resume template, handoff | Local `git diff --check` and snapshot/template `grep` checks passed; PR #11 CI `41816567695` succeeded; PR remains `OPEN` and clean. Standard merge calls and REST merge endpoint return `HTTP 405: Merge already in progress`. | Recheck GitHub PR/merge status; retry normal merge after the server-side merge lock clears, then record merge SHA | GitHub reports another merge operation in progress; do not bypass or force |
-| M-03 | Document `AWAITING APPROVAL` status and transitions | `TODO` | Not started | Pending | Add formal status consistently | None |
+| M-02 | Synchronize resume snapshot and handoff workflow | `DONE` | PR #11, branch `docs/M-02-sync-agent-resume`; implementation `f4033f0`, final head `95d003e8f5a19f9f458bf4297d111592cdaab3d4`; merge `0564d60cd8024b371caf60af2d804f6e2e8001b5`; README, AGENTS, PR template, resume template, handoff | `git diff --check` and snapshot/template `grep` passed; PR CI `41817157589` success (13 files / 85 tests); PR #11 merged; post-merge main CI `41817396993` success | Continue to M-03 | None |
+| M-03 | Document `AWAITING APPROVAL` status and transitions | `IN PROGRESS` | PR #12; branch `docs/M-03-awaiting-approval-status`; implementation `4409bb4`, checkpoint `2faad1f`; handoff, README, AGENTS, PR template, resume template | `git diff --check` and targeted status `grep` checks passed; M-02 PR CI `41817157589` (13 files / 85 tests) and post-merge CI `41817396993` passed; PR #12 CI pending | Verify PR #12 checks/reviews and merge only when requirements pass | None |
 | M-04 | Strengthen handoff checker and CI | `TODO` | Not started | Existing checker/gate reviewed as baseline | Audit actual repo coverage and add deterministic tests | None |
 | M-05 | Standardize task reporting | `TODO` | Not started | Pending | Extend existing template without duplication | None |
 | M-06 | Simulate Manus workflow end-to-end | `TODO` | Not started | Pending | Use temporary repositories/fixtures only | None |
@@ -105,3 +118,7 @@ Call the overall scanner/audit task complete only when each relevant tracker row
 - 2026-11-04 17:42 WIB — M-01 completed: PR #10 merged as `8641f104f81506125d4f7f87e4f5b88bb4e75f57`; PR CI `41815214824` and post-merge main CI `41815564475` succeeded. Started M-02 on `docs/M-02-sync-agent-resume` from that main SHA; synchronizing repository recovery guidance. A-01 remains the next application priority after M-series.
 - 2026-11-04 17:47 WIB — M-02 documentation changes committed (`f4033f0` plus handoff checkpoint `43cb0a1`) and PR #11 opened. Local `git diff --check` and snapshot/template grep checks passed. PR CI is pending; next verify required checks/reviews and merge only if permitted.
 - 2026-11-04 17:52 WIB — PR #11 CI run `41816567695` succeeded and PR is `OPEN`/`CLEAN` with no review decision. Normal merge request and REST `PUT /pulls/11/merge` return HTTP 405 `Merge already in progress`. M-02 set to `BLOCKED`; do not bypass. M-03 and later tasks have not started. Resume by checking the PR/merge lock and retrying only the standard merge after it clears.
+- 2026-11-04 17:56 WIB — GitHub cleared the merge-in-progress condition; PR #11 merged normally as `0564d60cd8024b371caf60af2d804f6e2e8001b5`. Latest PR CI `41817157589` and post-merge `main` CI `41817396993` succeeded. M-02 is `DONE`; started M-03 on `docs/M-03-awaiting-approval-status` from the verified merge SHA.
+- 2026-11-04 17:57 WIB — M-03 started on `docs/M-03-awaiting-approval-status` from main `0564d60cd8024b371caf60af2d804f6e2e8001b5`. Added formal `AWAITING APPROVAL` semantics/transitions and synchronized README, AGENTS, PR template, and resume prompt; consistency and CI checks pending.
+- 2026-11-04 17:58 WIB — M-03 documentation commit `4409bb4` created. `git diff --check` and targeted `grep` checks found `AWAITING APPROVAL` and the approval-vs-CI distinction across the synchronized files. Push/PR CI pending.
+- 2026-11-04 17:59 WIB — PR #12 opened from `docs/M-03-awaiting-approval-status` with implementation `4409bb4` and checkpoint `2faad1f`. Local status/diff checks passed; PR CI/review verification pending.

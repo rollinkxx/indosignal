@@ -17,6 +17,7 @@ This repository is the durable source of truth. A conversation link is supplemen
 - Use `.github/pull_request_template.md` for PRs. Keep secrets and private operational values out of documentation, diffs, logs, and shell output.
 - Every PR that changes implementation or operational configuration must add or edit a task row in `docs/AGENT-HANDOFF.md`. Pull-request CI enforces this and rejects timestamp-only/cosmetic tracker edits; documentation-only PRs are exempt. This gate proves only that a task row changed, not that code, deployment, or production behavior is correct.
 - Never label work `DONE` based on code presence or a prior agent's report alone. Record the evidence and distinguish local tests, CI, deployment, and production observation.
+- Use the handoff's formal status transitions. A successful commit, open PR, or green CI run is not approval; when required human review is pending, leave the task `AWAITING APPROVAL`. Deployment uses a separate approval process. Apply reviewer revisions to the same tracker task.
 - Before ending, ensure the working tree and tracker agree. Summarize the branch/commit, verified result, and exact remaining work.
 
 Detailed statuses, resume state, safety rules, and the copyable user-facing resume prompt are in `docs/AGENT-HANDOFF.md` and `docs/AGENT-RESUME-TEMPLATE.md`.
