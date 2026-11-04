@@ -51,6 +51,10 @@ Full repository quality gates on the M-06 working tree:
 
 Toolchain used: Node.js `v22.23.4`, pnpm `10.34.5` (the repository-pinned version).
 
-## Remaining verification
+## GitHub PR and completion evidence
 
-At the time this report was written, the dedicated M-06 GitHub PR, its required-check/review state, merge result, and post-merge `main` CI were still pending. Those results must be added to the handoff and this report only after fresh GitHub verification. No production deployment, database integration, live market data, or production behavior was tested or claimed here.
+The real workflow change was submitted as [PR #15](https://github.com/rollinkxx/indosignal/pull/15), branch `test/M-06-agent-workflow-rehearsal`, from base `e2cc77dc5d9d012d612ef375512929f40013e72b`. The final PR head was `d642b015d572c0804f96e0636a1117b5b0b66ca1`; the actual-diff handoff checker passed for that range. GitHub `CI/quality-gates` run `41866261201` succeeded on the PR head. The PR was merged normally as `362187df7444e1faa014584c0139b79a630c18a0`, and post-merge main CI run `41867501971` succeeded on that merge SHA. At merge time, `main` was unprotected, there were no repository rulesets or review requests, and no required review was bypassed.
+
+## Verification boundary
+
+All six scripted workflow scenarios are local fixture simulations; the PR and CI evidence separately verifies the real GitHub branch/PR/check/merge lifecycle. Neither evidence source proves autonomous model cognition, production deployment, database integration, live market behavior, or production runtime health. No production data or credentials were used.
