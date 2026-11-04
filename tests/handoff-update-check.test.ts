@@ -83,6 +83,58 @@ describe('checkHandoffCoverage', () => {
     }
   });
 
+  it('rejects an implementation-to-documentation rename without a handoff row', () => {
+    const repo = mkdtempSync(join(tmpdir(), 'handoff-rename-'));
+    try {
+      git(repo, 'init', '--quiet');
+      git(repo, 'config', 'user.email', 'handoff-test@example.invalid');
+      git(repo, 'config', 'user.name', 'Handoff Gate Test');
+      mkdirSync(join(repo, 'docs'), { recursive: true });
+      mkdirSync(join(repo, 'app', 'api'), { recursive: true });
+      writeFileSync(join(repo, 'docs', 'AGENT-HANDOFF.md'), '# Handoff\n');
+      writeFileSync(join(repo, 'app', 'api', 'route.ts'), 'export const GET = () => new Response("ok");\n');
+      git(repo, 'add', '.');
+      git(repo, 'commit', '--quiet', '-m', 'baseline');
+      const base = git(repo, 'rev-parse', 'HEAD');
+
+      git(repo, 'mv', 'app/api/route.ts', 'docs/route.md');
+      git(repo, 'commit', '--quiet', '-m', 'rename source as documentation');
+      const head = git(repo, 'rev-parse', 'HEAD');
+      const result = spawnSync(process.execPath, [checkerPath, base, head], { cwd: repo, encoding: 'utf8' });
+
+      expect(result.status).toBe(1);
+      expect(result.stderr).toContain('app/api/route.ts');
+    } finally {
+      rmSync(repo, { recursive: true, force: true });
+    }
+  });
+
+  it('requires a handoff row when an implementation file is deleted', () => {
+    const repo = mkdtempSync(join(tmpdir(), 'handoff-delete-'));
+    try {
+      git(repo, 'init', '--quiet');
+      git(repo, 'config', 'user.email', 'handoff-test@example.invalid');
+      git(repo, 'config', 'user.name', 'Handoff Gate Test');
+      mkdirSync(join(repo, 'docs'), { recursive: true });
+      mkdirSync(join(repo, 'app', 'api'), { recursive: true });
+      writeFileSync(join(repo, 'docs', 'AGENT-HANDOFF.md'), '# Handoff\n');
+      writeFileSync(join(repo, 'app', 'api', 'route.ts'), 'export const GET = () => new Response("ok");\n');
+      git(repo, 'add', '.');
+      git(repo, 'commit', '--quiet', '-m', 'baseline');
+      const base = git(repo, 'rev-parse', 'HEAD');
+
+      git(repo, 'rm', 'app/api/route.ts');
+      git(repo, 'commit', '--quiet', '-m', 'delete implementation');
+      const head = git(repo, 'rev-parse', 'HEAD');
+      const result = spawnSync(process.execPath, [checkerPath, base, head], { cwd: repo, encoding: 'utf8' });
+
+      expect(result.status).toBe(1);
+      expect(result.stderr).toContain('app/api/route.ts');
+    } finally {
+      rmSync(repo, { recursive: true, force: true });
+    }
+  });
+
   it('handles a real PR diff even when Git config forces colored output', () => {
     const repo = mkdtempSync(join(tmpdir(), 'handoff-gate-'));
     try {
