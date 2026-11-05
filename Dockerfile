@@ -28,6 +28,7 @@ COPY --from=builder --chown=nextjs:nextjs /app/next.config.ts ./next.config.ts
 COPY --from=builder --chown=nextjs:nextjs /app/db ./db
 COPY --from=builder --chown=nextjs:nextjs /app/scripts/migrate.mjs ./scripts/migrate.mjs
 COPY --from=builder --chown=nextjs:nextjs /app/scripts/audit-chain-backfill.mjs ./scripts/audit-chain-backfill.mjs
+COPY --from=builder --chown=nextjs:nextjs /app/scripts/disposable-database.mjs ./scripts/disposable-database.mjs
 COPY --from=builder --chown=nextjs:nextjs /app/scripts/migrations ./scripts/migrations
 COPY --from=builder --chown=nextjs:nextjs /app/lib/audit/hash-chain.mjs ./lib/audit/hash-chain.mjs
 EXPOSE 3000

@@ -1,18 +1,18 @@
 # Agent Handoff: Multipair Scanner & Application Audit
 
-**Last updated:** 2026-11-05 18:41 WIB
+**Last updated:** 2026-11-05 19:08 WIB
 **Repository:** `rollinkxx/indosignal`
-**Latest `main` observed:** `19ea34d7e1fa611061f2e9c19608858204b1d7f6` (PR #22 merged)
+**Latest `main` observed:** `4f9992ca37e1fac07e12c86b0d4db95fa0caa88b` (PR #25 merged)
 **Purpose:** Durable work log and source of truth for agents continuing scanner, audit, or remediation. Read this before starting; update it as work progresses, not only at session end.
 
 ## Resume snapshot — reconcile with Git before acting
 
-**Last reconciled:** 2026-11-05 18:41 WIB against `origin/main` at `19ea34d7e1fa611061f2e9c19608858204b1d7f6` after PR #22 merged; freshness PR #23 CI is verified.
-**Current focus:** M-01 through M-08 are complete. A-01 remains in progress; PWA registration and shared migration registry are merged, and this checkpoint starts browser market-freshness refresh.
-**Immediate next action:** Push the verified freshness slice on `audit/A-01-market-freshness-refresh-2026-11-05`, open a reviewable PR, and continue recovering historical items while keeping live-provider, deployment, PostgreSQL, Docker runtime, Hostless, and WORM boundaries explicit.
+**Last reconciled:** 2026-11-05 19:08 WIB against `origin/main` at `4f9992ca37e1fac07e12c86b0d4db95fa0caa88b` after PR #25 merged; no PRs are open and latest main CI `42022554681` passed.
+**Current focus:** M-01 through M-08 are complete. A-01 remains in progress; read-only Hostless evidence now shows the latest deployment builds successfully but crashes on start because the runner image omits `scripts/disposable-database.mjs`.
+**Immediate next action:** Verify the Docker runner fix locally, push `fix/A-05-hostless-startup-import-2026-11-05`, and verify CI/deployment only through an authorized non-destructive path.
 **Next application priority after M-series:** A-01 remains `IN PROGRESS` but incomplete. PR #18 contains only a scoped recovery slice; recover and verify the rest of the historical batch. No discretionary review wait is required.
 **Last known verification:** M-08 PR #19 merged at `a9ae04457eeaa8a88295e0a7ecf6e7c6fc86a666`; latest-head PR CI `41989293290` passed on `ab9f775afb62777a7b119469b65db2f01076a730`, and post-merge main CI `41989421456` passed on the merge SHA. Local focused tests passed (2 files/27 tests), full suite passed (14 files/101 tests), and typecheck, market-mock guard, Docker security static checks, production build, actual-diff handoff gate, and `git diff --check` passed. No deployment or production behavior was changed or verified. M-06 PR #15 and M-07 PR #16 remain verified as recorded below.
-**Known blockers:** None for the M-series. A-01's full historical patch remains unavailable; A-03 has no authorized disposable/staging PostgreSQL target, A-04 has no current Hostless deployment evidence, and A-06 has no external WORM receipt.
+**Known blockers:** None for the M-series. A-01's full historical patch remains unavailable; A-03 has no authorized disposable/staging PostgreSQL target; Hostless deployment currently fails at startup and needs a new authorized deployment after the fix; A-06 has no external WORM receipt.
 **Conversation handoff:** Use `docs/AGENT-RESUME-TEMPLATE.md` for a prior-session link. Read that history for intent/decisions only, then reconcile every status/claim against Git, CI, and this tracker.
 
 ## Start here — required protocol
@@ -66,7 +66,7 @@ Each row must answer: what is the state; where is the work (branch/commit/files)
 | A-02 | Run multipair scanner and application baseline checks | `DONE` | Baseline code at `6f34565e4314c2e3852eb569f8a408e418932546`; scanner implementation and `tests/multi-pair-universe.test.ts` are present | Fresh run on 2026-11-04: `pnpm install --frozen-lockfile`, `pnpm typecheck`, `pnpm test` (12 files/74 tests), `pnpm check:market-mocks`, `pnpm check:docker-security`, `pnpm build` all passed | Do not infer live scanning/deployment from local tests; perform operational checks below | Live provider, production worker, and production deployment were not verified |
 | A-03 | Disposable PostgreSQL integration checks and migration validation | `BLOCKED` | No disposable/staging DB was configured in this sandbox; no production DB touched | No DB integration test has been run in this continuation | Obtain an authorized disposable/staging PostgreSQL target; run migration and proof scripts only there | Safe PostgreSQL test environment unavailable |
 | A-04 | Confirm Hostless config/deployment/readiness | `BLOCKED` | No current Hostless deployment/config evidence captured | Prior audit reported dashboard HTTP 504; current secret presence, logs, deployment and `/api/ready` remain unknown | Through authorized access, verify separately configured migrator credential, TLS/least privilege, deployment logs, and readiness without exposing secrets | Hostless status/access not verified |
-| A-05 | Production Docker image build and runtime smoke checks | `IN PROGRESS` | PR #24 merged as `ddd0dd756c6d4b2bee3f2d508c5f112df36344e7`; `.github/workflows/ci.yml` now builds/inspects/removes the production image | PR #24 head CI `42021884168` and post-merge `main` CI `42022088717` passed, including `Build production Docker image`; static Docker check and all other quality gates passed | Obtain an approved deployed runtime target and run non-destructive health/readiness/market/scanner smoke checks | Docker daemon/deployed runtime target and deployment authorization unavailable |
+| A-05 | Production Docker image build and runtime smoke checks | `IN PROGRESS` | Branch `fix/A-05-hostless-startup-import-2026-11-05`; `Dockerfile` adds the runtime copy for `scripts/disposable-database.mjs`; base `main` `4f9992c` | Read-only Hostless deployment `#536b1153` for `4f9992c` built successfully but crashed on start with exit code 1; logs show `ERR_MODULE_NOT_FOUND` for `/app/scripts/disposable-database.mjs`; local main gates passed (18 files/126 tests, typecheck, static checks, build, diff check) | Run targeted Dockerfile/import checks, commit/push, verify CI, then redeploy only through authorized Hostless action and recheck readiness | Hostless deployment action/runtime smoke requires authorized external deployment; no disposable PostgreSQL or WORM evidence |
 | A-06 | Independent immutable/WORM audit-chain anchor | `BLOCKED` | No external storage receipt or custody evidence in repository | Repository-local hash/snapshot cannot prove independent immutability | Obtain evidence for separate immutable destination, independent key custody, signed snapshot, and verifiable receipt | Requires operator/provider evidence |
 
 ### Detail for A-01: prior audit's reported changes (not fully present/verified)
@@ -124,6 +124,15 @@ Call the overall scanner/audit task complete only when each relevant tracker row
 - Blocker: none for this source/test slice; live and production evidence remain unavailable
 
 ## Change log
+
+### 2026-11-05 19:08 WIB — A-05 — Hostless startup crash isolated
+- Status: IN PROGRESS
+- Branch / commit: `fix/A-05-hostless-startup-import-2026-11-05` / working tree
+- Changed files: `Dockerfile`, `docs/AGENT-HANDOFF.md`
+- Verification: Hostless deployment `#536b1153` for `4f9992c` — build succeeded, process exited 1; logs report `Error [ERR_MODULE_NOT_FOUND]: Cannot find module '/app/scripts/disposable-database.mjs' imported from /app/scripts/migrate.mjs`; local `corepack pnpm install --frozen-lockfile && corepack pnpm typecheck && corepack pnpm test && corepack pnpm check:market-mocks && corepack pnpm check:docker-security && corepack pnpm build && git diff --check` — passed (18 files / 126 tests)
+- Not verified: Docker runtime locally, redeployed Hostless readiness, PostgreSQL integration, live market behavior, and external WORM anchor
+- Next action: verify and commit the runner-image copy fix, then push and verify CI
+- Blocker: external redeployment/runtime smoke requires authorization; PostgreSQL and WORM evidence remain unavailable
 
 ### 2026-11-05 18:53 WIB — A-05 — Docker CI build closeout and runtime boundary
 - Status: IN PROGRESS
