@@ -125,13 +125,13 @@ Call the overall scanner/audit task complete only when each relevant tracker row
 
 ## Change log
 
-### 2026-11-05 19:08 WIB — A-05 — Hostless startup crash isolated
+### 2026-11-05 19:10 WIB — A-05 — Hostless startup fix verified in CI
 - Status: IN PROGRESS
-- Branch / commit: `fix/A-05-hostless-startup-import-2026-11-05` / working tree
+- Branch / commit: `fix/A-05-hostless-startup-import-2026-11-05` / `408c4da82c4bd7715126a360a39f69e8b98c6e6c` (PR #26)
 - Changed files: `Dockerfile`, `docs/AGENT-HANDOFF.md`
-- Verification: Hostless deployment `#536b1153` for `4f9992c` — build succeeded, process exited 1; logs report `Error [ERR_MODULE_NOT_FOUND]: Cannot find module '/app/scripts/disposable-database.mjs' imported from /app/scripts/migrate.mjs`; local `corepack pnpm install --frozen-lockfile && corepack pnpm typecheck && corepack pnpm test && corepack pnpm check:market-mocks && corepack pnpm check:docker-security && corepack pnpm build && git diff --check` — passed (18 files / 126 tests)
+- Verification: Hostless deployment `#536b1153` for `4f9992c` — build succeeded, process exited 1; logs report `Error [ERR_MODULE_NOT_FOUND]: Cannot find module '/app/scripts/disposable-database.mjs' imported from /app/scripts/migrate.mjs`; local full gates — passed (18 files / 126 tests); PR #26 CI `42024608319` / `quality-gates` — passed
 - Not verified: Docker runtime locally, redeployed Hostless readiness, PostgreSQL integration, live market behavior, and external WORM anchor
-- Next action: verify and commit the runner-image copy fix, then push and verify CI
+- Next action: merge PR #26 only through the normal authorized repository flow, then recheck the resulting deployment/readiness
 - Blocker: external redeployment/runtime smoke requires authorization; PostgreSQL and WORM evidence remain unavailable
 
 ### 2026-11-05 18:53 WIB — A-05 — Docker CI build closeout and runtime boundary
