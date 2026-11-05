@@ -1,7 +1,7 @@
 ## Task / handoff
 
 - Tracker ID(s): <!-- e.g. A-01, H-03 -->
-- Current tracker status: <!-- TODO | IN PROGRESS | BLOCKED | AWAITING APPROVAL | DONE -->
+- Current tracker status: <!-- TODO | IN PROGRESS | BLOCKED | DONE -->
 - Handoff updated in this PR: <!-- link docs/AGENT-HANDOFF.md section/row -->
 - Branch and checkpoint commit: <!-- branch / SHA -->
 
@@ -28,5 +28,4 @@ For implementation or operational configuration changes, CI requires an added or
 - [ ] I distinguished code changes, local tests, CI, deployment, and production verification.
 - [ ] If this is a continuation, I checked the repo state against the conversation and did not repeat verified work.
 
-Before merge, verify the PR's required checks, required reviews, and branch-protection rules on GitHub. Do not treat a green CI run or successful commit as approval, and never bypass a repository control.
-If required review is still pending, keep the task `AWAITING APPROVAL`, not `DONE`; apply requested revisions to the same tracker row. Deployment approval is separate.
+Before merge, verify the PR's required checks and branch-protection rules on GitHub; follow any review explicitly required by repository settings and never bypass a repository control. Routine task completion does not wait for discretionary review; mark a task `DONE` when its acceptance evidence is verified. Apply any requested revisions to the same tracker row. Deployment and other consequential external actions retain separate authorization requirements.
