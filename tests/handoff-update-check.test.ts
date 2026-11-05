@@ -14,10 +14,10 @@ const taskRowDiff = [
   '+| H-04 | Require tracker updates for code PRs | `IN PROGRESS` | branch | pending | implement | none |',
 ].join('\n');
 
-const awaitingApprovalRowDiff = [
+const inProgressRowDiff = [
   'diff --git a/docs/AGENT-HANDOFF.md b/docs/AGENT-HANDOFF.md',
   '@@ -40,0 +41 @@',
-  '+| M-07 | Automation evaluation | `AWAITING APPROVAL` | branch | evidence ready | wait for review | none |',
+  '+| M-07 | Automation evaluation | `IN PROGRESS` | branch | evidence ready | run final checks | none |',
 ].join('\n');
 
 const cosmeticHandoffDiff = [
@@ -46,8 +46,8 @@ describe('checkHandoffCoverage', () => {
     expect(checkHandoffCoverage(['app/api/health/route.ts', 'docs/AGENT-HANDOFF.md'], taskRowDiff)).toMatchObject({ required: true, covered: true });
   });
 
-  it('accepts an AWAITING APPROVAL task-row format without claiming to validate status meaning', () => {
-    expect(checkHandoffCoverage(['app/api/health/route.ts', 'docs/AGENT-HANDOFF.md'], awaitingApprovalRowDiff)).toMatchObject({ required: true, covered: true });
+  it('accepts an IN PROGRESS task-row format without claiming to validate status meaning', () => {
+    expect(checkHandoffCoverage(['app/api/health/route.ts', 'docs/AGENT-HANDOFF.md'], inProgressRowDiff)).toMatchObject({ required: true, covered: true });
   });
 
   it('does not require a handoff row for documentation-only changes', () => {

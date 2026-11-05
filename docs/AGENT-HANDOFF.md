@@ -1,18 +1,18 @@
 # Agent Handoff: Multipair Scanner & Application Audit
 
-**Last updated:** 2026-11-05 04:45 WIB
+**Last updated:** 2026-11-05 18:41 WIB
 **Repository:** `rollinkxx/indosignal`
-**Latest `main` observed:** `52887e6124880eb589f3f447b96bc9b40cb3213d`
+**Latest `main` observed:** `19ea34d7e1fa611061f2e9c19608858204b1d7f6` (PR #22 merged)
 **Purpose:** Durable work log and source of truth for agents continuing scanner, audit, or remediation. Read this before starting; update it as work progresses, not only at session end.
 
 ## Resume snapshot — reconcile with Git before acting
 
-**Last reconciled:** 2026-11-05 04:45 WIB against `origin/main` at `52887e6124880eb589f3f447b96bc9b40cb3213d`. Working branch is `audit/A-01-recover-review-2026-11-05`; A-01 scoped recovery changes are uncommitted pending checkpoint.
-**Current focus:** M-series M-01 through M-07 are complete. M-07 PR [#16](https://github.com/rollinkxx/indosignal/pull/16) merged at `7e5f956ce4e26e7e54ae0d131e894ebf27ee7e82` after its PR and post-merge CI passed.
-**Immediate next action:** Wait for PR #18 quality-gates and human review; after approval, verify the PR lifecycle. A-03, A-04, A-05, and A-06 retain their separate environment/evidence blockers.
-**Next application priority after agent-workflow tasks:** A-01 scoped recovery is prepared and awaiting human approval; the complete earlier remediation batch remains unavailable.
-**Last known verification:** M-06 PR #15 merged at `362187df7444e1faa014584c0139b79a630c18a0`; PR CI `41866261201` passed on head `d642b015d572c0804f96e0636a1117b5b0b66ca1`, and post-merge main CI `41867501971` passed. M-07 PR #16 merged at `7e5f956ce4e26e7e54ae0d131e894ebf27ee7e82`; PR CI `41869709733` passed on head `0a70dbbb4a2bd809bd429c6cc90d9c009ed1f062`, and post-merge main CI `41870065221` passed on the merge SHA. Decision coverage check passed 13/13 markers; actual-diff handoff gate and `git diff --check` passed. No additional automation/configuration was created. M-06 fixtures remain local simulations and neither task verifies production deployment/runtime.
-**Known blockers:** None for the M-series. A-series remains separate and has explicit external blockers: no authorized disposable/staging PostgreSQL target (A-03), no current Hostless deployment evidence (A-04), and no external WORM receipt (A-06).
+**Last reconciled:** 2026-11-05 18:41 WIB against `origin/main` at `19ea34d7e1fa611061f2e9c19608858204b1d7f6` after PR #22 merged; freshness PR #23 CI is verified.
+**Current focus:** M-01 through M-08 are complete. A-01 remains in progress; PWA registration and shared migration registry are merged, and this checkpoint starts browser market-freshness refresh.
+**Immediate next action:** Push the verified freshness slice on `audit/A-01-market-freshness-refresh-2026-11-05`, open a reviewable PR, and continue recovering historical items while keeping live-provider, deployment, PostgreSQL, Docker runtime, Hostless, and WORM boundaries explicit.
+**Next application priority after M-series:** A-01 remains `IN PROGRESS` but incomplete. PR #18 contains only a scoped recovery slice; recover and verify the rest of the historical batch. No discretionary review wait is required.
+**Last known verification:** M-08 PR #19 merged at `a9ae04457eeaa8a88295e0a7ecf6e7c6fc86a666`; latest-head PR CI `41989293290` passed on `ab9f775afb62777a7b119469b65db2f01076a730`, and post-merge main CI `41989421456` passed on the merge SHA. Local focused tests passed (2 files/27 tests), full suite passed (14 files/101 tests), and typecheck, market-mock guard, Docker security static checks, production build, actual-diff handoff gate, and `git diff --check` passed. No deployment or production behavior was changed or verified. M-06 PR #15 and M-07 PR #16 remain verified as recorded below.
+**Known blockers:** None for the M-series. A-01's full historical patch remains unavailable; A-03 has no authorized disposable/staging PostgreSQL target, A-04 has no current Hostless deployment evidence, and A-06 has no external WORM receipt.
 **Conversation handoff:** Use `docs/AGENT-RESUME-TEMPLATE.md` for a prior-session link. Read that history for intent/decisions only, then reconcile every status/claim against Git, CI, and this tracker.
 
 ## Start here — required protocol
@@ -32,20 +32,17 @@ Use only these statuses:
 - `TODO` — not started or not yet attempted in the current repository state.
 - `IN PROGRESS` — an agent has begun; include branch and immediate next action.
 - `BLOCKED` — cannot proceed without a named external dependency, access, decision, or safe test environment; specify exactly what would unblock it.
-- `AWAITING APPROVAL` — acceptance evidence is ready for review, but a required human review/approval has not yet been recorded.
 - `DONE` — acceptance evidence exists and was verified on the recorded commit/environment. If only a subset is complete, split it into a separate row or leave the row in progress.
 
 Allowed status transitions:
 
 - `TODO` → `IN PROGRESS` when work starts and its branch/scope/next action are recorded.
 - `IN PROGRESS` → `BLOCKED` when a named dependency prevents safe progress.
-- `IN PROGRESS` → `AWAITING APPROVAL` when implementation and acceptance evidence are ready and required review is pending.
+- `IN PROGRESS` → `DONE` when acceptance criteria are verified, required checks pass, and evidence is recorded.
 - `BLOCKED` → `IN PROGRESS` when the recorded blocker is resolved.
 - `BLOCKED` → `TODO` only when the task is canceled and the reason is recorded.
-- `AWAITING APPROVAL` → `IN PROGRESS` when reviewers request revisions; update the same task rather than creating a duplicate.
-- `AWAITING APPROVAL` → `DONE` only after required approval is recorded and acceptance criteria are met.
 
-CI green is not approval. A successful commit or open PR does not make a task `DONE`. Deployment has a separate approval process. If a required review is absent, keep the status `AWAITING APPROVAL`. The handoff checker only detects a changed task row for implementation/configuration PRs; it does not validate status meaning, relevance, verification evidence, or truth of claims.
+Routine task completion does not require discretionary human approval. Do not introduce a manual-review waiting state; honor reviews only when repository branch-protection or ownership rules explicitly require them. CI proves only the checks it ran; a commit, open PR, or green CI does not by itself prove deployment or production behavior. Deployment and other consequential external actions retain separate authorization requirements. The handoff checker only detects a changed task row for implementation/configuration PRs; it does not validate status meaning, relevance, verification evidence, or truth of claims.
 
 Each row must answer: what is the state; where is the work (branch/commit/files); what command or observation proves it; what happens next; and what is blocking it. Do not use “done” to mean merely “implemented”.
 
@@ -63,17 +60,18 @@ Each row must answer: what is the state; where is the work (branch/commit/files)
 | M-04 | Strengthen handoff checker and CI | `DONE` | PR #13; branch `ci/M-04-strengthen-handoff-gate`; implementation `b95af83`; merge `c0887182a65577cdf0fb3d65c684e6164d8fe3fd`; checker/tests/handoff | Actual-diff gate passed; focused 18 and full 92 tests, typecheck, market-mock/Docker checks, build and audit passed; PR CI `41819061846` and post-merge main CI `41819166573` succeeded | Gate now covers tracked runtime/config path classes; maintain regression tests | None |
 | M-05 | Standardize task reporting | `DONE` | PR #14; implementation `0fa6723`; merge `e2cc77dc5d9d012d612ef375512929f40013e72b`; README, AGENTS, resume prompt, PR template, handoff | PR CI `41820850447` passed on head `6a462b50410fc35d4518a9740518062db5c0b1a6`; post-merge main CI `41821896457` passed; no merge protection/review requirement was bypassed | Use the concise report schema for future tasks | None |
 | M-06 | Simulate Manus workflow end-to-end | `DONE` | PR #15 [MERGED](https://github.com/rollinkxx/indosignal/pull/15); branch `test/M-06-agent-workflow-rehearsal`; base `e2cc77dc5d9d012d612ef375512929f40013e72b`; final head `d642b015d572c0804f96e0636a1117b5b0b66ca1`; merge `362187df7444e1faa014584c0139b79a630c18a0`; report `docs/M-06-SIMULATION.md` | PR CI `41866261201` passed; post-merge main CI `41867501971` passed on merge SHA; 14 files / 101 tests, typecheck, market-mock/Docker static checks, production build, audit, focused 27 tests and actual-diff check passed. Six local workflow categories and checker regressions recorded with fixture-only boundaries. | Use its recovery/checkpoint protocol for subsequent tasks | None |
-| M-07 | Evaluate further automation | `DONE` | PR #16 [MERGED](https://github.com/rollinkxx/indosignal/pull/16); branch `docs/M-07-automation-evaluation`; base `362187df7444e1faa014584c0139b79a630c18a0`; final head `0a70dbbb4a2bd809bd429c6cc90d9c009ed1f062`; merge `7e5f956ce4e26e7e54ae0d131e894ebf27ee7e82`; decision commit `71d5ba8688199dab38cbde2860328538dcc7fb8d`; `docs/DECISIONS.md`, M-06 closeout, handoff | M-07 coverage 13/13; `git diff --check` and actual-diff checker passed. PR CI `41869709733` passed on final head; post-merge main CI `41870065221` passed on merge SHA. Evaluation covers CI/gaps, scheduling, assignment, reminders, stale branches, periodic health, multi-agent, external tracker, and branch protection. No extra automation/configuration was created. | None for M-series; A-01 remains the next application priority and is still `TODO` | None |
-| A-01 | Recover and review the earlier uncommitted remediation batch | `AWAITING APPROVAL` | PR #18 (`https://github.com/rollinkxx/indosignal/pull/18`); branch `audit/A-01-recover-review-2026-11-05`; implementation `ca246436480d8aa98b0743598c56b38d8dbd20c6`; scoped recovery files plus `docs/A-01-DIFFERENTIAL-REVIEW-2026-11-05.md` | Local focused 19/19, full 15-file/120-test suite, typecheck, market-mock, Docker static checks, production build, diff check, and handoff gate passed; PR quality-gates run `41969822449` is still `IN_PROGRESS`; no review decision recorded | Wait for CI and human review; do not merge or claim full historical batch recovered | No authorized disposable/staging PostgreSQL target; no DB runtime integration evidence |
+| M-07 | Evaluate further automation | `DONE` | PR #16 [MERGED](https://github.com/rollinkxx/indosignal/pull/16); branch `docs/M-07-automation-evaluation`; base `362187df7444e1faa014584c0139b79a630c18a0`; final head `0a70dbbb4a2bd809bd429c6cc90d9c009ed1f062`; merge `7e5f956ce4e26e7e54ae0d131e894ebf27ee7e82`; decision commit `71d5ba8688199dab38cbde2860328538dcc7fb8d`; `docs/DECISIONS.md`, M-06 closeout, handoff | M-07 coverage 13/13; `git diff --check` and actual-diff checker passed. PR CI `41869709733` passed on final head; post-merge main CI `41870065221` passed on merge SHA. Evaluation covers CI/gaps, scheduling, assignment, reminders, stale branches, periodic health, multi-agent, external tracker, and branch protection. No extra automation/configuration was created. | M-01–M-08 complete; resume A-01 | None |
+| M-08 | Remove discretionary manual-review gating for routine task completion | `DONE` | PR #19 [MERGED](https://github.com/rollinkxx/indosignal/pull/19); branch `docs/M-08-remove-manual-review-gate`; implementation `7a45743`; merge `a9ae04457eeaa8a88295e0a7ecf6e7c6fc86a666`; 8 files | Local focused tests (2 files/27 tests), full suite (14 files/101 tests), typecheck, market-mock guard, Docker static checks, build, actual-diff handoff gate, and diff check passed; PR CI `41989293290` passed on final head; post-merge main CI `41989421456` passed | M-series complete; resume A-01 | None |
+| A-01 | Recover and review the earlier uncommitted remediation batch | `IN PROGRESS` | PR #18 (`https://github.com/rollinkxx/indosignal/pull/18`) plus branch `audit/A-01-market-freshness-refresh-2026-11-05`; implementation `3e03b2514812dc7a578129349ea2d6ae94907bd8`, PR #23; PWA and migration-registry slices merged by PRs #21/#22 | Focused freshness test 1 file/2 tests; full suite 17 files/107 tests; typecheck, market-mock guard, Docker static check, production build, and diff check passed locally; PR #22 `quality-gates` run `42014370092` passed and merge commit is `19ea34d`; PR #18 `quality-gates` run `41969901497` passed for its separate DB-proof slice | Record PR #23 CI, merge the verified slice, and continue recovering remaining historical items | Full historical patch is not available; no live-provider/deployment evidence, disposable PostgreSQL target, Docker runtime, Hostless, or WORM evidence |
 | A-02 | Run multipair scanner and application baseline checks | `DONE` | Baseline code at `6f34565e4314c2e3852eb569f8a408e418932546`; scanner implementation and `tests/multi-pair-universe.test.ts` are present | Fresh run on 2026-11-04: `pnpm install --frozen-lockfile`, `pnpm typecheck`, `pnpm test` (12 files/74 tests), `pnpm check:market-mocks`, `pnpm check:docker-security`, `pnpm build` all passed | Do not infer live scanning/deployment from local tests; perform operational checks below | Live provider, production worker, and production deployment were not verified |
 | A-03 | Disposable PostgreSQL integration checks and migration validation | `BLOCKED` | No disposable/staging DB was configured in this sandbox; no production DB touched | No DB integration test has been run in this continuation | Obtain an authorized disposable/staging PostgreSQL target; run migration and proof scripts only there | Safe PostgreSQL test environment unavailable |
 | A-04 | Confirm Hostless config/deployment/readiness | `BLOCKED` | No current Hostless deployment/config evidence captured | Prior audit reported dashboard HTTP 504; current secret presence, logs, deployment and `/api/ready` remain unknown | Through authorized access, verify separately configured migrator credential, TLS/least privilege, deployment logs, and readiness without exposing secrets | Hostless status/access not verified |
 | A-05 | Production Docker image build and runtime smoke checks | `TODO` | Docker unavailable in the earlier sandbox; CI workflow/build outcome for production image not evidenced in current tracker | Static `check:docker-security` is not a Docker image build | Verify CI contains and passes an actual image build; after authorized deployment, run non-destructive health/readiness/market/scanner smoke checks | Requires Docker-capable CI and approved deployment window for production smoke checks |
 | A-06 | Independent immutable/WORM audit-chain anchor | `BLOCKED` | No external storage receipt or custody evidence in repository | Repository-local hash/snapshot cannot prove independent immutability | Obtain evidence for separate immutable destination, independent key custody, signed snapshot, and verifiable receipt | Requires operator/provider evidence |
 
-### Detail for A-01: prior audit's reported changes (not present/verified in this checkout)
+### Detail for A-01: prior audit's reported changes (not fully present/verified)
 
-The previous audit session described a local uncommitted batch covering: shared migration-version registry; disposable-database guards in DB proof scripts; same-run audit-chain migration/verifier; readiness cache; market freshness refresh; backtest caveats and error redaction; minimal public health response; PWA offline shell; multipair warm-up budget; and Docker build checks in CI. Do not mark any of these as applied until the full change is recovered, reviewed, and present on a recorded branch/commit. Do not blindly copy partial artifact snapshots or apply a database migration to production.
+The previous audit session described a local uncommitted batch covering: shared migration-version registry; disposable-database guards in DB proof scripts; same-run audit-chain migration/verifier; readiness cache; market freshness refresh; backtest caveats and error redaction; minimal public health response; PWA offline shell; multipair warm-up budget; and Docker build checks in CI. PR #18 contains a scoped recovery of selected DB-proof safety changes, but it is not the complete historical batch. Do not mark the remaining items as applied until recovered and verified on a recorded branch/commit. Do not blindly copy partial artifact snapshots or apply a database migration to production.
 
 ### Safe database and production rules
 
@@ -98,9 +96,46 @@ Append a dated entry after each meaningful slice and update the corresponding ta
 
 Call the overall scanner/audit task complete only when each relevant tracker row is separately resolved: recovered remediation is reviewed and committed; typecheck, full tests, static checks, production build, and required CI pass on the recorded change; disposable/staging DB integration passes; an actual Docker production image build passes; current Hostless configuration/deployment/readiness has evidence; and any residual WORM/anchor limitation is evidenced or explicitly accepted. A local build or green documentation PR is not proof of production recovery.
 
+### 2026-11-05 17:43 WIB — A-01 — PWA registration checkpoint
+- Status: IN PROGRESS
+- Branch / commit: `audit/A-01-pwa-offline-registration-2026-11-05` / `7d622691df94d56a9dbcd0db2b0a1c5115fe2232`
+- Changed files: `app/layout.tsx`, `components/service-worker-register.tsx`, `tests/pwa-registration.test.ts`, `docs/AGENT-HANDOFF.md`
+- Verification: `corepack pnpm exec vitest run tests/pwa-registration.test.ts` — 1 file / 2 tests passed; `corepack pnpm typecheck` — passed; `corepack pnpm test` — 15 files / 103 tests passed; `corepack pnpm check:market-mocks` — passed; `corepack pnpm check:docker-security` — passed; `corepack pnpm build` — passed; `git diff --check` — passed
+- Not verified: browser install/activate/offline behavior, live market freshness, PostgreSQL integration, Docker image runtime, Hostless deployment/readiness, and external WORM anchor
+- Next action: continue recovering the remaining historical A-01 items from PR #21
+- Blocker: none for this source/test slice; the wider A-01 historical batch and runtime evidence remain incomplete
+
+### 2026-11-05 17:52 WIB — A-01 — shared migration registry checkpoint
+- Status: IN PROGRESS
+- Branch / commit: `audit/A-01-migration-registry-2026-11-05` / `788832ad7bfa267e91619be92515127247ba74ae`
+- Changed files: `lib/db/migration-registry.json`, `app/api/ready/route.ts`, `instrumentation.ts`, `scripts/migrate.mjs`, `tests/migration-registry.test.ts`, `docs/AGENT-HANDOFF.md`
+- Verification: `corepack pnpm exec vitest run tests/migration-registry.test.ts` — 1 file / 2 tests passed; `corepack pnpm typecheck` — passed; `corepack pnpm test` — 16 files / 105 tests passed; `corepack pnpm check:market-mocks` — passed; `corepack pnpm check:docker-security` — passed; `corepack pnpm build` — passed; `git diff --check` — passed
+- Not verified: PostgreSQL migration execution, disposable/staging integration, deployment/readiness, Docker image runtime, and external WORM anchor
+- Next action: push the branch, open a PR, and verify latest-head CI
+- Blocker: none for this source/test slice; database and production evidence remain unavailable
+
+### 2026-11-05 17:56 WIB — A-01 — market freshness refresh checkpoint
+- Status: IN PROGRESS
+- Branch / commit: `audit/A-01-market-freshness-refresh-2026-11-05` / `3e03b2514812dc7a578129349ea2d6ae94907bd8`
+- Changed files: `components/market-overview.tsx`, `tests/market-freshness.test.ts`, `docs/AGENT-HANDOFF.md`
+- Verification: `corepack pnpm exec vitest run tests/market-freshness.test.ts` — 1 file / 2 tests passed; `corepack pnpm typecheck` — passed; `corepack pnpm test` — 17 files / 107 tests passed; `corepack pnpm check:market-mocks` — passed; `corepack pnpm check:docker-security` — passed; `corepack pnpm build` — passed; `git diff --check` — passed
+- Not verified: live provider behavior, browser/network integration, deployment freshness, PostgreSQL integration, Docker image runtime, and external WORM anchor
+- Next action: push the branch, open a PR, and verify latest-head CI
+- Blocker: none for this source/test slice; live and production evidence remain unavailable
+
 ## Change log
-- 2026-11-05 04:46 WIB — Pushed A-01 checkpoint `ca24643` as PR #18. GitHub reports the PR `OPEN`/`MERGEABLE`; quality-gates run `41969822449` is `IN_PROGRESS` and no review decision is recorded. Do not merge or mark A-01 `DONE` until CI and required human review are verified.
-- 2026-11-05 04:45 WIB — A-01 recovery reviewed on `audit/A-01-recover-review-2026-11-05` from `origin/main` `52887e6`. Applied only the scoped DB-proof safety slice from recovered commit `1f7e2a1`; added rejection of PostgreSQL routing query parameters and sanitized proof errors after differential review found endpoint-alias risk. Added `docs/A-01-DIFFERENTIAL-REVIEW-2026-11-05.md`. Focused 19/19 tests, full 15-file/120-test suite, typecheck, market-mock, Docker static checks, production build, and diff check passed. A-01 is `AWAITING APPROVAL`; no disposable DB, Hostless, Docker runtime, or WORM evidence was obtained.
+
+### 2026-11-05 18:41 WIB — A-01 — market freshness PR verification
+- Status: IN PROGRESS
+- Branch / commit: `audit/A-01-market-freshness-refresh-2026-11-05` / `6172633`
+- Changed files: `components/market-overview.tsx`, `tests/market-freshness.test.ts`, `docs/AGENT-HANDOFF.md`
+- Verification: PR #23 `quality-gates` run `42020779222` — passed; local focused freshness test 1 file / 2 tests, full suite 17 files / 107 tests, typecheck, market-mock guard, Docker security static check, production build, and `git diff --check` — passed
+- Not verified: live provider behavior, browser/network integration, deployment freshness, PostgreSQL integration, Docker image runtime, and external WORM anchor
+- Next action: merge PR #23 normally after latest-head verification, then continue the next recoverable A-01 code slice
+- Blocker: none for this source/test slice; live and production evidence remain unavailable
+
+
+- 2026-11-05 17:45 WIB — A-01 PWA slice pushed as PR #21 (`https://github.com/rollinkxx/indosignal/pull/21`) from `audit/A-01-pwa-offline-registration-2026-11-05`; implementation commit `7d622691df94d56a9dbcd0db2b0a1c5115fe2232`. PR `quality-gates` run `42013307395` passed, including handoff gate, typecheck, 15 files/103 tests, market-mock and Docker checks, production build, and dependency audit. Browser offline behavior and wider runtime/production boundaries remain unverified.
 
 - 2026-11-04 12:15 WIB — Added the initial detailed handoff and linked it from README (PR #4, merged as `e2ed4fe`).
 - 2026-11-04 12:24 WIB — Committed and pushed checkpoint protocol, explicit statuses, task table, template, and README start instructions as `3318452`; documentation checks passed locally; CI/PR pending.
@@ -150,3 +185,6 @@ Call the overall scanner/audit task complete only when each relevant tracker row
 - 2026-11-04 23:38 WIB — Recorded the M-07 decision matrix in `docs/DECISIONS.md` (commit `71d5ba8688199dab38cbde2860328538dcc7fb8d`). Coverage check passed 13/13 required markers and `git diff --check` passed. Snapshot found no open PRs/issues; no new automation was justified. Next create the dedicated M-07 PR and verify its complete GitHub lifecycle.
 - 2026-11-04 23:39 WIB — Opened PR #16 (`https://github.com/rollinkxx/indosignal/pull/16`) from `docs/M-07-automation-evaluation` at head `9c90b20166d01a584e806e6740421670d3247a4c` against base `362187df7444e1faa014584c0139b79a630c18a0`. It was `OPEN`; review decision and status-check rollup were empty at creation. Record the tracker checkpoint, then verify checks on the latest head before merge.
 - 2026-11-04 23:43 WIB — PR #16 merged normally at `7e5f956ce4e26e7e54ae0d131e894ebf27ee7e82`. PR CI `41869709733` passed on final head `0a70dbbb4a2bd809bd429c6cc90d9c009ed1f062`; post-merge main CI `41870065221` passed on the merge SHA. M-07 acceptance evidence is complete; no new automation was added. M-01–M-07 are complete; A-01 remains separate and `TODO`.
+- 2026-11-05 14:40 WIB — M-08 policy and workflow-test changes are implemented on `docs/M-08-remove-manual-review-gate`. Focused tests passed (2 files/27 tests); full suite passed (14 files/101 tests); typecheck, market-mock guard, Docker security static checks, production build, and `git diff --check` passed. No deployment or production behavior was changed or verified. Next commit and push the checkpoint, then open a documentation-policy PR and verify CI.
+- 2026-11-05 14:43 WIB — Opened PR #19 (`https://github.com/rollinkxx/indosignal/pull/19`) from `docs/M-08-remove-manual-review-gate`, head `8d1974063150b1803a32f3196e08ad48d5c3c44c`, against `main` at `52887e6124880eb589f3f447b96bc9b40cb3213d`. `quality-gates` run `41989114146` completed successfully; review list is empty and main branch is unprotected. Next update/push this evidence checkpoint, re-verify latest-head CI, then merge normally. No deployment/production behavior was changed or verified.
+- 2026-11-05 14:48 WIB — PR #19 merged at `a9ae04457eeaa8a88295e0a7ecf6e7c6fc86a666`. PR CI `41989293290` passed on latest head `ab9f775afb62777a7b119469b65db2f01076a730`; post-merge main CI `41989421456` passed on the merge SHA. M-08 is `DONE`; M-01–M-08 are complete. Resume A-01 as the next priority; its recovered PR #18 remains scoped and does not resolve the staging PostgreSQL or production/deployment blockers.

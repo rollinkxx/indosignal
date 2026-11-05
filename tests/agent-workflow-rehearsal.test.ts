@@ -56,7 +56,7 @@ function makeFixture() {
 function writeTaskRow(
   repo: string,
   options: {
-    status: 'TODO' | 'IN PROGRESS' | 'BLOCKED' | 'AWAITING APPROVAL' | 'DONE';
+    status: 'TODO' | 'IN PROGRESS' | 'BLOCKED' | 'DONE';
     branch?: string;
     commit?: string;
     evidence?: string;
@@ -93,7 +93,7 @@ function writeSmokeFixture(repo: string, value: string) {
 }
 
 describe('isolated Manus workflow rehearsal', () => {
-  it('simulates normal completion and fresh-clone recovery with review gating', () => {
+  it('simulates normal completion and fresh-clone recovery without manual-review gating', () => {
     const { root, remote, repo } = makeFixture();
     try {
       expect(readFileSync(join(repo, 'AGENTS.md'), 'utf8')).toContain('Read TODO.md');
@@ -127,34 +127,34 @@ describe('isolated Manus workflow rehearsal', () => {
       const taskCommit = git(repo, 'rev-parse', 'HEAD');
 
       writeTaskRow(repo, {
-        status: 'AWAITING APPROVAL',
+        status: 'IN PROGRESS',
         branch,
         commit: taskCommit,
-        evidence: 'Fixture smoke and handoff checks passed; review not yet recorded',
-        next: 'Wait for required fixture reviewer approval',
+        evidence: 'Fixture smoke and handoff checks passed on the task branch',
+        next: 'Merge through the repository workflow and verify the integrated commit',
       });
       git(repo, 'add', 'docs/AGENT-HANDOFF.md');
-      git(repo, 'commit', '--quiet', '-m', 'record fixture review gate');
+      git(repo, 'commit', '--quiet', '-m', 'record verified fixture checks');
       const branchHead = git(repo, 'rev-parse', 'HEAD');
       const gate = command(repo, process.execPath, [checkerPath, baseSha, branchHead]);
       expect(gate.status).toBe(0);
       expect(gate.stdout).toContain('Handoff task-row update found');
       git(repo, 'push', '--quiet', '--set-upstream', 'origin', branch);
-      expect(taskStatus(repo)).toBe('AWAITING APPROVAL');
-      expect(taskRow(repo)).toContain('review not yet recorded');
+      expect(taskStatus(repo)).toBe('IN PROGRESS');
+      expect(taskRow(repo)).toContain('checks passed on the task branch');
 
       git(repo, 'switch', 'main');
-      git(repo, 'merge', '--quiet', '--no-ff', branch, '-m', 'fixture PR merge after approval');
+      git(repo, 'merge', '--quiet', '--no-ff', branch, '-m', 'fixture PR merge');
       const mergeCommit = git(repo, 'rev-parse', 'HEAD');
       writeTaskRow(repo, {
         status: 'DONE',
         branch,
         commit: taskCommit,
-        evidence: `Fixture checks passed; fixture reviewer approval recorded; local merge ${mergeCommit}`,
+        evidence: `Fixture checks passed and integrated; local merge ${mergeCommit}`,
         next: 'None',
       });
       git(repo, 'add', 'docs/AGENT-HANDOFF.md');
-      git(repo, 'commit', '--quiet', '-m', 'record fixture task completion after review');
+      git(repo, 'commit', '--quiet', '-m', 'record verified fixture task completion');
       git(repo, 'push', '--quiet', 'origin', 'main');
 
       const freshClone = join(root, 'fresh-clone');
@@ -163,7 +163,7 @@ describe('isolated Manus workflow rehearsal', () => {
       expect(taskStatus(freshClone)).toBe('DONE');
       expect(recoveredRow).toContain(branch);
       expect(recoveredRow).toContain(taskCommit);
-      expect(recoveredRow).toContain('fixture reviewer approval recorded');
+      expect(recoveredRow).toContain('checks passed and integrated');
       expect(recoveredRow).toContain('| None | None |');
       expect(git(freshClone, 'rev-parse', `origin/${branch}`)).toBe(branchHead);
       expect(git(freshClone, 'cat-file', '-e', `${taskCommit}^{commit}`)).toBe('');
@@ -200,18 +200,18 @@ describe('isolated Manus workflow rehearsal', () => {
       expect(passingRun.status).toBe(0);
       expect(passingRun.stdout).toContain('smoke check passed');
       writeTaskRow(repo, {
-        status: 'AWAITING APPROVAL',
+        status: 'IN PROGRESS',
         branch,
         commit: git(repo, 'rev-parse', 'HEAD'),
         evidence: 'Deterministic smoke failure fixed; rerun passed',
-        next: 'Await the fixture review gate before marking DONE',
+        next: 'Verify integration before marking DONE',
       });
       git(repo, 'add', 'app/health.txt', 'docs/AGENT-HANDOFF.md');
       git(repo, 'commit', '--quiet', '-m', 'fix fixture smoke check');
       const headSha = git(repo, 'rev-parse', 'HEAD');
       const gate = command(repo, process.execPath, [checkerPath, baseSha, headSha]);
       expect(gate.status).toBe(0);
-      expect(taskStatus(repo)).toBe('AWAITING APPROVAL');
+      expect(taskStatus(repo)).toBe('IN PROGRESS');
       expect(taskStatus(repo)).not.toBe('DONE');
     } finally {
       rmSync(root, { recursive: true, force: true });

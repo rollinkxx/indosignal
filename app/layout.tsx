@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import type { ReactNode } from 'react';
 import { AppShell } from '@/components/app-shell';
+import { ServiceWorkerRegister } from '@/components/service-worker-register';
 import { SITE_ORIGIN } from '@/lib/site';
 import './globals.css';
 
@@ -22,5 +23,5 @@ export const viewport: Viewport = { themeColor: '#090b10', colorScheme: 'dark', 
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   const jsonLd = { '@context': 'https://schema.org', '@graph': [{ '@type': 'WebSite', name: 'indo signal', url: SITE_ORIGIN, inLanguage: 'id-ID' }, { '@type': 'Organization', name: 'indo signal', url: SITE_ORIGIN }] };
-  return <html lang="id"><body><AppShell>{children}</AppShell><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} /><link rel="manifest" href="/manifest.webmanifest" /><script src="/sw.js" defer /></body></html>;
+  return <html lang="id"><body><AppShell>{children}</AppShell><ServiceWorkerRegister /><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} /><link rel="manifest" href="/manifest.webmanifest" /></body></html>;
 }
