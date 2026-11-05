@@ -1,13 +1,13 @@
 # Agent Handoff: Multipair Scanner & Application Audit
 
-**Last updated:** 2026-11-05 18:41 WIB
+**Last updated:** 2026-11-05 18:43 WIB
 **Repository:** `rollinkxx/indosignal`
 **Latest `main` observed:** `19ea34d7e1fa611061f2e9c19608858204b1d7f6` (PR #22 merged)
 **Purpose:** Durable work log and source of truth for agents continuing scanner, audit, or remediation. Read this before starting; update it as work progresses, not only at session end.
 
 ## Resume snapshot — reconcile with Git before acting
 
-**Last reconciled:** 2026-11-05 18:41 WIB against `origin/main` at `19ea34d7e1fa611061f2e9c19608858204b1d7f6` after PR #22 merged; freshness PR #23 CI is verified.
+**Last reconciled:** 2026-11-05 18:43 WIB against `origin/main` at `5147a79a15d5429f4916cd2cf631a7aa92a0c450` after PR #23 merged; post-merge CI is verified.
 **Current focus:** M-01 through M-08 are complete. A-01 remains in progress; PWA registration and shared migration registry are merged, and this checkpoint starts browser market-freshness refresh.
 **Immediate next action:** Push the verified freshness slice on `audit/A-01-market-freshness-refresh-2026-11-05`, open a reviewable PR, and continue recovering historical items while keeping live-provider, deployment, PostgreSQL, Docker runtime, Hostless, and WORM boundaries explicit.
 **Next application priority after M-series:** A-01 remains `IN PROGRESS` but incomplete. PR #18 contains only a scoped recovery slice; recover and verify the rest of the historical batch. No discretionary review wait is required.
@@ -62,7 +62,7 @@ Each row must answer: what is the state; where is the work (branch/commit/files)
 | M-06 | Simulate Manus workflow end-to-end | `DONE` | PR #15 [MERGED](https://github.com/rollinkxx/indosignal/pull/15); branch `test/M-06-agent-workflow-rehearsal`; base `e2cc77dc5d9d012d612ef375512929f40013e72b`; final head `d642b015d572c0804f96e0636a1117b5b0b66ca1`; merge `362187df7444e1faa014584c0139b79a630c18a0`; report `docs/M-06-SIMULATION.md` | PR CI `41866261201` passed; post-merge main CI `41867501971` passed on merge SHA; 14 files / 101 tests, typecheck, market-mock/Docker static checks, production build, audit, focused 27 tests and actual-diff check passed. Six local workflow categories and checker regressions recorded with fixture-only boundaries. | Use its recovery/checkpoint protocol for subsequent tasks | None |
 | M-07 | Evaluate further automation | `DONE` | PR #16 [MERGED](https://github.com/rollinkxx/indosignal/pull/16); branch `docs/M-07-automation-evaluation`; base `362187df7444e1faa014584c0139b79a630c18a0`; final head `0a70dbbb4a2bd809bd429c6cc90d9c009ed1f062`; merge `7e5f956ce4e26e7e54ae0d131e894ebf27ee7e82`; decision commit `71d5ba8688199dab38cbde2860328538dcc7fb8d`; `docs/DECISIONS.md`, M-06 closeout, handoff | M-07 coverage 13/13; `git diff --check` and actual-diff checker passed. PR CI `41869709733` passed on final head; post-merge main CI `41870065221` passed on merge SHA. Evaluation covers CI/gaps, scheduling, assignment, reminders, stale branches, periodic health, multi-agent, external tracker, and branch protection. No extra automation/configuration was created. | M-01–M-08 complete; resume A-01 | None |
 | M-08 | Remove discretionary manual-review gating for routine task completion | `DONE` | PR #19 [MERGED](https://github.com/rollinkxx/indosignal/pull/19); branch `docs/M-08-remove-manual-review-gate`; implementation `7a45743`; merge `a9ae04457eeaa8a88295e0a7ecf6e7c6fc86a666`; 8 files | Local focused tests (2 files/27 tests), full suite (14 files/101 tests), typecheck, market-mock guard, Docker static checks, build, actual-diff handoff gate, and diff check passed; PR CI `41989293290` passed on final head; post-merge main CI `41989421456` passed | M-series complete; resume A-01 | None |
-| A-01 | Recover and review the earlier uncommitted remediation batch | `IN PROGRESS` | PR #18 (`https://github.com/rollinkxx/indosignal/pull/18`) plus branch `audit/A-01-market-freshness-refresh-2026-11-05`; implementation `3e03b2514812dc7a578129349ea2d6ae94907bd8`, PR #23; PWA and migration-registry slices merged by PRs #21/#22 | Focused freshness test 1 file/2 tests; full suite 17 files/107 tests; typecheck, market-mock guard, Docker static check, production build, and diff check passed locally; PR #22 `quality-gates` run `42014370092` passed and merge commit is `19ea34d`; PR #18 `quality-gates` run `41969901497` passed for its separate DB-proof slice | Record PR #23 CI, merge the verified slice, and continue recovering remaining historical items | Full historical patch is not available; no live-provider/deployment evidence, disposable PostgreSQL target, Docker runtime, Hostless, or WORM evidence |
+| A-01 | Recover and review the earlier uncommitted remediation batch | `IN PROGRESS` | PR #18 (`https://github.com/rollinkxx/indosignal/pull/18`) plus branch `audit/A-01-market-freshness-refresh-2026-11-05`; implementation `3e03b2514812dc7a578129349ea2d6ae94907bd8`, PR #23; PWA and migration-registry slices merged by PRs #21/#22 | Focused freshness test 1 file/2 tests; full suite 17 files/107 tests; typecheck, market-mock guard, Docker static check, production build, and diff check passed locally; PR #22 `quality-gates` run `42014370092` passed and merge commit is `19ea34d`; PR #23 `quality-gates` runs `42020779222` and `42020974821` passed, merged as `5147a79`, and post-merge `main` CI `42021096047` passed; PR #18 `quality-gates` run `41969901497` passed for its separate DB-proof slice | Record PR #23 merge and post-merge CI, then continue recovering remaining historical items | Full historical patch is not available; no live-provider/deployment evidence, disposable PostgreSQL target, Docker runtime, Hostless, or WORM evidence |
 | A-02 | Run multipair scanner and application baseline checks | `DONE` | Baseline code at `6f34565e4314c2e3852eb569f8a408e418932546`; scanner implementation and `tests/multi-pair-universe.test.ts` are present | Fresh run on 2026-11-04: `pnpm install --frozen-lockfile`, `pnpm typecheck`, `pnpm test` (12 files/74 tests), `pnpm check:market-mocks`, `pnpm check:docker-security`, `pnpm build` all passed | Do not infer live scanning/deployment from local tests; perform operational checks below | Live provider, production worker, and production deployment were not verified |
 | A-03 | Disposable PostgreSQL integration checks and migration validation | `BLOCKED` | No disposable/staging DB was configured in this sandbox; no production DB touched | No DB integration test has been run in this continuation | Obtain an authorized disposable/staging PostgreSQL target; run migration and proof scripts only there | Safe PostgreSQL test environment unavailable |
 | A-04 | Confirm Hostless config/deployment/readiness | `BLOCKED` | No current Hostless deployment/config evidence captured | Prior audit reported dashboard HTTP 504; current secret presence, logs, deployment and `/api/ready` remain unknown | Through authorized access, verify separately configured migrator credential, TLS/least privilege, deployment logs, and readiness without exposing secrets | Hostless status/access not verified |
@@ -124,6 +124,16 @@ Call the overall scanner/audit task complete only when each relevant tracker row
 - Blocker: none for this source/test slice; live and production evidence remain unavailable
 
 ## Change log
+
+### 2026-11-05 18:43 WIB — A-01 — market freshness merge verification
+- Status: IN PROGRESS
+- Branch / commit: `main` / `5147a79a15d5429f4916cd2cf631a7aa92a0c450`
+- Changed files: `components/market-overview.tsx`, `tests/market-freshness.test.ts`, `docs/AGENT-HANDOFF.md`
+- Verification: PR #23 head CI `42020974821` passed; PR #23 merged normally; post-merge `main` CI `42021096047` passed
+- Not verified: live provider behavior, browser/network integration, deployment freshness, PostgreSQL integration, Docker image runtime, and external WORM anchor
+- Next action: reconcile the recovery branches and select the next code-only A-01 slice
+- Blocker: none for this source/test slice; live and production evidence remain unavailable
+
 
 ### 2026-11-05 18:41 WIB — A-01 — market freshness PR verification
 - Status: IN PROGRESS
