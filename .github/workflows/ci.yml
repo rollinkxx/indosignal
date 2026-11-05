@@ -41,6 +41,12 @@ jobs:
         run: pnpm check:market-mocks
       - name: Check Docker security
         run: pnpm check:docker-security
+      - name: Build production Docker image
+        run: |
+          image="indosignal:ci-${GITHUB_SHA}"
+          docker build --pull --file Dockerfile --tag "$image" .
+          docker image inspect "$image" >/dev/null
+          docker image rm "$image"
       - name: Production build
         run: pnpm build
       - name: Dependency audit

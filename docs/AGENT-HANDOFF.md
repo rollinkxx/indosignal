@@ -66,7 +66,7 @@ Each row must answer: what is the state; where is the work (branch/commit/files)
 | A-02 | Run multipair scanner and application baseline checks | `DONE` | Baseline code at `6f34565e4314c2e3852eb569f8a408e418932546`; scanner implementation and `tests/multi-pair-universe.test.ts` are present | Fresh run on 2026-11-04: `pnpm install --frozen-lockfile`, `pnpm typecheck`, `pnpm test` (12 files/74 tests), `pnpm check:market-mocks`, `pnpm check:docker-security`, `pnpm build` all passed | Do not infer live scanning/deployment from local tests; perform operational checks below | Live provider, production worker, and production deployment were not verified |
 | A-03 | Disposable PostgreSQL integration checks and migration validation | `BLOCKED` | No disposable/staging DB was configured in this sandbox; no production DB touched | No DB integration test has been run in this continuation | Obtain an authorized disposable/staging PostgreSQL target; run migration and proof scripts only there | Safe PostgreSQL test environment unavailable |
 | A-04 | Confirm Hostless config/deployment/readiness | `BLOCKED` | No current Hostless deployment/config evidence captured | Prior audit reported dashboard HTTP 504; current secret presence, logs, deployment and `/api/ready` remain unknown | Through authorized access, verify separately configured migrator credential, TLS/least privilege, deployment logs, and readiness without exposing secrets | Hostless status/access not verified |
-| A-05 | Production Docker image build and runtime smoke checks | `TODO` | Docker unavailable in the earlier sandbox; CI workflow/build outcome for production image not evidenced in current tracker | Static `check:docker-security` is not a Docker image build | Verify CI contains and passes an actual image build; after authorized deployment, run non-destructive health/readiness/market/scanner smoke checks | Requires Docker-capable CI and approved deployment window for production smoke checks |
+| A-05 | Production Docker image build and runtime smoke checks | `IN PROGRESS` | Branch `audit/A-05-docker-image-ci-2026-11-05`; current base `main` `30ecdbef65ab9d351077e420c6d92566d75667cd`; `.github/workflows/ci.yml` | Static `check:docker-security` passes; actual image build is newly added to CI and pending fresh PR run | Run local config checks, open PR, verify actual Docker build in CI; runtime smoke remains a separate authorized deployment step | Docker daemon is unavailable in this sandbox; approved deployment window/runtime target not available |
 | A-06 | Independent immutable/WORM audit-chain anchor | `BLOCKED` | No external storage receipt or custody evidence in repository | Repository-local hash/snapshot cannot prove independent immutability | Obtain evidence for separate immutable destination, independent key custody, signed snapshot, and verifiable receipt | Requires operator/provider evidence |
 
 ### Detail for A-01: prior audit's reported changes (not fully present/verified)
@@ -124,6 +124,16 @@ Call the overall scanner/audit task complete only when each relevant tracker row
 - Blocker: none for this source/test slice; live and production evidence remain unavailable
 
 ## Change log
+
+### 2026-11-05 18:49 WIB — A-05 — actual Docker image build CI slice
+- Status: IN PROGRESS
+- Branch / commit: `audit/A-05-docker-image-ci-2026-11-05` / pending
+- Changed files: `.github/workflows/ci.yml`, `docs/AGENT-HANDOFF.md`
+- Verification: existing static Docker security check passes; actual `docker build --pull --file Dockerfile` plus image inspect/remove is added to CI, fresh PR verification pending
+- Not verified: local Docker daemon, runtime health/readiness, deployment, database migration, live market behavior, and external WORM anchor
+- Next action: push/open PR and verify the fresh CI image build
+- Blocker: Docker runtime smoke requires an approved deployed target; local sandbox has no Docker daemon
+
 
 ### 2026-11-05 18:47 WIB — A-01 — DB-proof safety slice reconciled with current main
 - Status: IN PROGRESS
