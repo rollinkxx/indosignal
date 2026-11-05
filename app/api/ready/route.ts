@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import { getDbPool } from '@/lib/db/client';
+import migrationRegistry from '@/lib/db/migration-registry.json';
 
-const REQUIRED_MIGRATIONS = ['0003-postgresql-initial', '0004-forward-test', '0005-multi-pair-scan', '0006-retire_legacy_btc_forward_test', '0007-api_limits', '0008-event_hash_chain', '0009-database_constraints'];
+const REQUIRED_MIGRATIONS = migrationRegistry.required;
 
 export async function GET() {
   try {

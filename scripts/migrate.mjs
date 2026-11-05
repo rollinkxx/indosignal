@@ -3,6 +3,7 @@ import pg from 'pg';
 import { backfillAuditChain } from './audit-chain-backfill.mjs';
 
 const { Client } = pg;
+const migrationRegistry = JSON.parse(await readFile(new URL('../lib/db/migration-registry.json', import.meta.url), 'utf8'));
 const isProduction = process.env.NODE_ENV === 'production';
 const allowRuntimeFallback = process.env.ALLOW_RUNTIME_DATABASE_MIGRATION === 'true';
 const connectionString = process.env.MIGRATION_DATABASE_URL
@@ -25,10 +26,10 @@ try {
   await client.query(initialSchema);
   await client.query(
     'INSERT INTO schema_migrations (version) VALUES ($1) ON CONFLICT (version) DO NOTHING',
-    ['0003-postgresql-initial'],
+    [migrationRegistry.initial],
   );
   await client.query('COMMIT');
-  console.log('database migration applied: 0003-postgresql-initial');
+  console.log(`database migration applied: ${migrationRegistry.initial}`);
 
   const directory = new URL('./migrations/', import.meta.url);
   const migrationFiles = (await readdir(directory))
@@ -52,7 +53,7 @@ try {
     await client.query('COMMIT');
     console.log(`database migration applied: ${version}`);
   }
-  const auditMigration = await client.query('SELECT 1 FROM schema_migrations WHERE version=$1', ['0008-event_hash_chain']);
+  const auditMigration = await client.query('SELECT 1 FROM schema_migrations WHERE version=$1', [migrationRegistry.auditChain]);
   if (auditMigration.rowCount) {
     const result = await backfillAuditChain(client);
     console.log(`forward-test audit hash chain verified/backfilled: ${result.backfilled} event(s)`);
