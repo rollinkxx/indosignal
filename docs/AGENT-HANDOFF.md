@@ -66,7 +66,7 @@ Each row must answer: what is the state; where is the work (branch/commit/files)
 | A-02 | Run multipair scanner and application baseline checks | `DONE` | Baseline code at `6f34565e4314c2e3852eb569f8a408e418932546`; scanner implementation and `tests/multi-pair-universe.test.ts` are present | Fresh run on 2026-11-04: `pnpm install --frozen-lockfile`, `pnpm typecheck`, `pnpm test` (12 files/74 tests), `pnpm check:market-mocks`, `pnpm check:docker-security`, `pnpm build` all passed | Do not infer live scanning/deployment from local tests; perform operational checks below | Live provider, production worker, and production deployment were not verified |
 | A-03 | Disposable PostgreSQL integration checks and migration validation | `BLOCKED` | No disposable/staging DB was configured in this sandbox; no production DB touched | No DB integration test has been run in this continuation | Obtain an authorized disposable/staging PostgreSQL target; run migration and proof scripts only there | Safe PostgreSQL test environment unavailable |
 | A-04 | Confirm Hostless config/deployment/readiness | `BLOCKED` | No current Hostless deployment/config evidence captured | Prior audit reported dashboard HTTP 504; current secret presence, logs, deployment and `/api/ready` remain unknown | Through authorized access, verify separately configured migrator credential, TLS/least privilege, deployment logs, and readiness without exposing secrets | Hostless status/access not verified |
-| A-05 | Production Docker image build and runtime smoke checks | `IN PROGRESS` | Branch `audit/A-05-docker-image-ci-2026-11-05`; current base `main` `30ecdbef65ab9d351077e420c6d92566d75667cd`; `.github/workflows/ci.yml` | Static `check:docker-security` passes; actual image build is newly added to CI and pending fresh PR run | Run local config checks, open PR, verify actual Docker build in CI; runtime smoke remains a separate authorized deployment step | Docker daemon is unavailable in this sandbox; approved deployment window/runtime target not available |
+| A-05 | Production Docker image build and runtime smoke checks | `IN PROGRESS` | PR #24 (`https://github.com/rollinkxx/indosignal/pull/24`); branch `audit/A-05-docker-image-ci-2026-11-05`; implementation `db5ae69b237dcccf12b6b12950a3621185dc2bba` | PR CI `42021682798` passed, including `Build production Docker image`, typecheck, 18-file/126-test suite, mock guard, Docker static check, production build, and audit | Record latest-head CI, merge the CI slice, then obtain an approved deployment target for runtime smoke | Docker runtime smoke/deployment target is unavailable; no database or live-provider evidence claimed |
 | A-06 | Independent immutable/WORM audit-chain anchor | `BLOCKED` | No external storage receipt or custody evidence in repository | Repository-local hash/snapshot cannot prove independent immutability | Obtain evidence for separate immutable destination, independent key custody, signed snapshot, and verifiable receipt | Requires operator/provider evidence |
 
 ### Detail for A-01: prior audit's reported changes (not fully present/verified)
@@ -124,6 +124,16 @@ Call the overall scanner/audit task complete only when each relevant tracker row
 - Blocker: none for this source/test slice; live and production evidence remain unavailable
 
 ## Change log
+
+### 2026-11-05 18:50 WIB — A-05 — Docker image build CI verification
+- Status: IN PROGRESS
+- Branch / commit: `audit/A-05-docker-image-ci-2026-11-05` / `db5ae69b237dcccf12b6b12950a3621185dc2bba`
+- Changed files: `.github/workflows/ci.yml`, `docs/AGENT-HANDOFF.md`
+- Verification: PR #24 `quality-gates` run `42021682798` passed; the `Build production Docker image` step built, inspected, and removed the production image; all other quality gates passed
+- Not verified: runtime health/readiness, deployment, database migration, live market behavior, and external WORM anchor
+- Next action: push this evidence checkpoint, verify its fresh-head CI, then merge normally
+- Blocker: runtime smoke requires an approved deployed target; sandbox has no Docker daemon
+
 
 ### 2026-11-05 18:49 WIB — A-05 — actual Docker image build CI slice
 - Status: IN PROGRESS
