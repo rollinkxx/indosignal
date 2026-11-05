@@ -31,6 +31,7 @@ COPY --from=builder --chown=nextjs:nextjs /app/scripts/audit-chain-backfill.mjs 
 COPY --from=builder --chown=nextjs:nextjs /app/scripts/disposable-database.mjs ./scripts/disposable-database.mjs
 COPY --from=builder --chown=nextjs:nextjs /app/scripts/migrations ./scripts/migrations
 COPY --from=builder --chown=nextjs:nextjs /app/lib/audit/hash-chain.mjs ./lib/audit/hash-chain.mjs
+COPY --from=builder --chown=nextjs:nextjs /app/lib/db/migration-registry.json ./lib/db/migration-registry.json
 EXPOSE 3000
 USER nextjs
 CMD ["sh", "-c", "node scripts/migrate.mjs && unset MIGRATION_DATABASE_URL MIGRATION_DATABASE_SSL && exec node node_modules/next/dist/bin/next start -H 0.0.0.0 -p ${PORT:-3000}"]
