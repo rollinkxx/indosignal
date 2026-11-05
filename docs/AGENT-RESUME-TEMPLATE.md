@@ -11,8 +11,8 @@ Repository recovery protocol:
 2. Fetch origin. Record default branch and latest origin/main SHA; inspect current branch, HEAD, working tree, recent commits, open PRs, reviews, CI checks, required checks, branch protection, and relevant issue/tracker state. Do not assume old conversation evidence is current.
 3. Compare the Resume snapshot and attached conversation claims against Git, GitHub PR/CI, and the task tracker. Reconcile stale snapshot claims before substantive work. Do not redo verified work or assume uncommitted changes survived a session change.
 4. Continue only the earliest unfinished task in the repository's declared sequence. Before implementation, set/add the tracker row to IN PROGRESS with scope, acceptance evidence, branch, and one concrete next action.
-5. Use only the status values and transitions defined in docs/AGENT-HANDOFF.md. A green CI run, commit, or open PR is not human approval. If required review is pending, set the same task to AWAITING APPROVAL; on requested revisions return that task to IN PROGRESS instead of creating a duplicate. Deployment approval is separate.
-6. Work on a task-specific branch and PR. Run relevant checks, record exact commands/results and test counts, distinguish verified from unverified claims, and commit/push a recoverable checkpoint after each meaningful slice. Never bypass required reviews, branch protection, or security controls.
+5. Use only the status values and transitions defined in docs/AGENT-HANDOFF.md. Do not wait for discretionary human approval to mark a task complete; set DONE when acceptance criteria and required checks are verified. Respect reviews explicitly required by repository rules and never bypass branch protection or security controls. Deployment and other consequential external actions retain separate authorization requirements.
+6. Work on a task-specific branch and PR when appropriate. Run relevant checks, record exact commands/results and test counts, distinguish verified from unverified claims, and commit/push a recoverable checkpoint after each meaningful slice. Honor configured repository controls without adding a separate manual-approval gate.
 7. If blocked, record the exact dependency and what would unblock it. Do not claim DONE without fresh evidence that acceptance criteria are met. Keep secrets and private operational values out of the repository and logs.
 8. At handoff, update the Resume snapshot with last reconciled timestamp/time zone/main SHA, active task/status/branch/commit, one immediate next action, correct next priority, last known verification, current blockers, and a conversation link for context only.
 
@@ -23,7 +23,7 @@ Final user-facing report (concise; use existing PR/handoff evidence rather than 
 - Boundaries: what was not verified (for example deployment, database, live behavior).
 - Next action and blocker/access needed, or `None`.
 
-Do not invent counts, call green CI a human approval, or claim deployment/production success without direct evidence. This summary is a rendering of the PR/tracker evidence, not a second status record.
+Do not invent counts or claim deployment/production success without direct evidence. A green CI run proves only the checks it executed. This summary is a rendering of the PR/tracker evidence, not a second status record.
 ```
 
 ## Recommended use of a conversation link

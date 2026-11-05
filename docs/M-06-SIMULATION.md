@@ -1,5 +1,7 @@
 # M-06 — Agent Workflow Simulation
 
+> Historical note: this report records the M-06 workflow as it existed at the time. Its review-gating scenarios were superseded by M-08; current workflow tests no longer require discretionary human review for routine completion. Repository-mandated checks and consequential-action authorization still apply.
+
 ## Purpose and boundary
 
 This report records a deterministic, local rehearsal of the repository's task recovery, handoff, validation, review-state, and completion workflow. All scripted scenarios create temporary working repositories and local bare Git remotes under the operating-system temporary directory and remove them in `finally` blocks. They do not create GitHub PRs, use production data or credentials, connect to PostgreSQL/Hostless, or prove autonomous model cognition.
