@@ -1,0 +1,13 @@
+{
+  "initial": "0003-postgresql-initial",
+  "required": [
+    "0003-postgresql-initial",
+    "0004-forward-test",
+    "0005-multi-pair-scan",
+    "0006-retire_legacy_btc_forward_test",
+    "0007-api_limits",
+    "0008-event_hash_chain",
+    "0009-database_constraints"
+  ],
+  "auditChain": "0008-event_hash_chain"
+}
