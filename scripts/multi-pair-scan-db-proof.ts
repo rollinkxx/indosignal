@@ -5,6 +5,7 @@ import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { MultiPairScanRepository, type MultiPairUniverse } from '../lib/forward-test/multi-pair-repository';
 import { getDbPool } from '../lib/db/client';
+import { applyDisposableRuntimeDatabase, formatDisposableDatabaseError, resolveDisposableDatabaseTargets } from './disposable-database.mjs';
 
 const scriptPath = fileURLToPath(import.meta.url);
 const mode = process.argv[2];
@@ -72,11 +73,13 @@ async function verifyAfterRestart(): Promise<void> {
 }
 
 async function main(): Promise<void> {
+  const targets = resolveDisposableDatabaseTargets(process.env, { requireMigration: true });
+  if (mode === 'seed' || mode === 'verify') applyDisposableRuntimeDatabase(process.env, { requireMigration: true });
   if (mode === 'seed') return seed();
   if (mode === 'verify') return verifyAfterRestart();
-  const testDbUrl = process.env.TEST_DATABASE_URL;
-  if (!testDbUrl) throw new Error('Set TEST_DATABASE_URL to a disposable local PostgreSQL database; production DATABASE_URL is intentionally not accepted.');
-  const env = { ...process.env, NODE_ENV: 'test' as const, DATABASE_URL: testDbUrl, DATABASE_SSL: process.env.TEST_DATABASE_SSL ?? 'disable', MULTI_PAIR_PROOF_CAMPAIGN_KEY: `multi-pair-proof:${randomUUID()}` };
+  if (mode !== undefined) throw new Error('Mode proof multipair tidak dikenal.');
+  if (!targets.testMigrationDatabaseUrl) throw new Error('TEST_MIGRATION_DATABASE_URL wajib untuk proof multipair.');
+  const env = { ...process.env, NODE_ENV: 'test' as const, MULTI_PAIR_PROOF_CAMPAIGN_KEY: `multi-pair-proof:${randomUUID()}` };
   runProcess(['scripts/migrate.mjs'], env);
   runProcess(['--import', 'tsx', resolve(scriptPath), 'seed'], env);
   runProcess(['--import', 'tsx', resolve(scriptPath), 'verify'], env);
@@ -84,7 +87,7 @@ async function main(): Promise<void> {
 }
 
 void main().catch(async (error) => {
-  console.error(error instanceof Error ? error.stack : 'Multi-pair scan DB proof failed.');
+  console.error(formatDisposableDatabaseError(error, 'Multi-pair scan DB proof failed.'));
   try { await closePool(); } catch { /* pool might not be initialized */ }
   process.exitCode = 1;
 });

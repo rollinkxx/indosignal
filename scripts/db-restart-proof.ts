@@ -1,8 +1,10 @@
 import { randomUUID } from 'node:crypto';
 import { PaperRepository } from '../lib/db/paper-repository';
 import { getDbPool } from '../lib/db/client';
+import { applyDisposableRuntimeDatabase, formatDisposableDatabaseError } from './disposable-database.mjs';
 
 async function main() {
+  applyDisposableRuntimeDatabase(process.env);
   const repository = new PaperRepository();
   const existingAccountId = process.env.READ_ACCOUNT_ID;
   if (existingAccountId) {
@@ -35,4 +37,7 @@ async function main() {
   } finally { await repository.close(); }
 }
 
-void main();
+void main().catch((error) => {
+  console.error(formatDisposableDatabaseError(error, 'DB restart proof failed.'));
+  process.exitCode = 1;
+});
