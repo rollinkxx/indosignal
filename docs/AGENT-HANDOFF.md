@@ -7,12 +7,12 @@
 
 ## Resume snapshot — reconcile with Git before acting
 
-**Last reconciled:** 2026-11-05 19:08 WIB against `origin/main` at `4f9992ca37e1fac07e12c86b0d4db95fa0caa88b` after PR #25 merged; no PRs are open and latest main CI `42022554681` passed.
-**Current focus:** M-01 through M-08 are complete. A-01 remains in progress; read-only Hostless evidence now shows the latest deployment builds successfully but crashes on start because the runner image omits `scripts/disposable-database.mjs`.
-**Immediate next action:** Verify the Docker runner fix locally, push `fix/A-05-hostless-startup-import-2026-11-05`, and verify CI/deployment only through an authorized non-destructive path.
+**Last reconciled:** 2026-11-05 20:22 WIB against `origin/main` at `b0756ddedae36387618f6b9bd2cddfe2160d562b`; no PRs are open, latest main CI `42027134309` passed, and `main` is not branch-protected.
+**Current focus:** M-01 through M-08 are complete. A-01 remains in progress. Hostless deployment `#83e4137e` for `b0756dd` built successfully but crashes because the runner image omits `lib/db/migration-registry.json`; the source fix is in PR #27 and its CI passed. Hostless settings show only `DATABASE_URL`, while production startup also requires a separate DDL-capable `MIGRATION_DATABASE_URL`.
+**Immediate next action:** Configure a separate least-privilege DDL migrator credential as Hostless secret `MIGRATION_DATABASE_URL` (do not reuse `DATABASE_URL`), then merge PR #27 through normal flow and verify deployment/readiness.
 **Next application priority after M-series:** A-01 remains `IN PROGRESS` but incomplete. PR #18 contains only a scoped recovery slice; recover and verify the rest of the historical batch. No discretionary review wait is required.
-**Last known verification:** M-08 PR #19 merged at `a9ae04457eeaa8a88295e0a7ecf6e7c6fc86a666`; latest-head PR CI `41989293290` passed on `ab9f775afb62777a7b119469b65db2f01076a730`, and post-merge main CI `41989421456` passed on the merge SHA. Local focused tests passed (2 files/27 tests), full suite passed (14 files/101 tests), and typecheck, market-mock guard, Docker security static checks, production build, actual-diff handoff gate, and `git diff --check` passed. No deployment or production behavior was changed or verified. M-06 PR #15 and M-07 PR #16 remain verified as recorded below.
-**Known blockers:** None for the M-series. A-01's full historical patch remains unavailable; A-03 has no authorized disposable/staging PostgreSQL target; Hostless deployment currently fails at startup and needs a new authorized deployment after the fix; A-06 has no external WORM receipt.
+**Last known verification:** A-05 PR #27 head `ca78ae94df7e97922e70abc1fd6a21df9f3206d8` passed `CI/quality-gates` run `42035700036`. Local gates passed: `pnpm check:docker-security`, full tests (18 files/126 tests), `pnpm typecheck`, `pnpm check:market-mocks`, `pnpm build`, and `git diff --check`. Hostless environment-variable settings show exactly one production variable, `DATABASE_URL`; `MIGRATION_DATABASE_URL` is absent. The database `indosignal-db` reports Healthy, but no DDL migrator credential is configured. Docker daemon is unavailable in the sandbox. M-06 PR #15 and M-07 PR #16 remain verified as recorded below.
+**Known blockers:** A-01's full historical patch remains unavailable; A-03 has no authorized disposable/staging PostgreSQL target; A-05 cannot safely merge/deploy until a separate DDL-capable `MIGRATION_DATABASE_URL` is configured; actual Docker image build/runtime cannot run locally because Docker is unavailable; A-06 has no external WORM receipt.
 **Conversation handoff:** Use `docs/AGENT-RESUME-TEMPLATE.md` for a prior-session link. Read that history for intent/decisions only, then reconcile every status/claim against Git, CI, and this tracker.
 
 ## Start here — required protocol
@@ -66,7 +66,7 @@ Each row must answer: what is the state; where is the work (branch/commit/files)
 | A-02 | Run multipair scanner and application baseline checks | `DONE` | Baseline code at `6f34565e4314c2e3852eb569f8a408e418932546`; scanner implementation and `tests/multi-pair-universe.test.ts` are present | Fresh run on 2026-11-04: `pnpm install --frozen-lockfile`, `pnpm typecheck`, `pnpm test` (12 files/74 tests), `pnpm check:market-mocks`, `pnpm check:docker-security`, `pnpm build` all passed | Do not infer live scanning/deployment from local tests; perform operational checks below | Live provider, production worker, and production deployment were not verified |
 | A-03 | Disposable PostgreSQL integration checks and migration validation | `BLOCKED` | No disposable/staging DB was configured in this sandbox; no production DB touched | No DB integration test has been run in this continuation | Obtain an authorized disposable/staging PostgreSQL target; run migration and proof scripts only there | Safe PostgreSQL test environment unavailable |
 | A-04 | Confirm Hostless config/deployment/readiness | `BLOCKED` | No current Hostless deployment/config evidence captured | Prior audit reported dashboard HTTP 504; current secret presence, logs, deployment and `/api/ready` remain unknown | Through authorized access, verify separately configured migrator credential, TLS/least privilege, deployment logs, and readiness without exposing secrets | Hostless status/access not verified |
-| A-05 | Production Docker image build and runtime smoke checks | `IN PROGRESS` | Branch `fix/A-05-hostless-startup-import-2026-11-05`; `Dockerfile` adds the runtime copy for `scripts/disposable-database.mjs`; base `main` `4f9992c` | Read-only Hostless deployment `#536b1153` for `4f9992c` built successfully but crashed on start with exit code 1; logs show `ERR_MODULE_NOT_FOUND` for `/app/scripts/disposable-database.mjs`; local main gates passed (18 files/126 tests, typecheck, static checks, build, diff check) | Run targeted Dockerfile/import checks, commit/push, verify CI, then redeploy only through authorized Hostless action and recheck readiness | Hostless deployment action/runtime smoke requires authorized external deployment; no disposable PostgreSQL or WORM evidence |
+| A-05 | Production Docker image build and runtime smoke checks | `BLOCKED` | PR #27 on branch `fix/A-05-migration-registry-2026-11-05`; commit `ca78ae94df7e97922e70abc1fd6a21df9f3206d8` fixes the missing registry copy and asserts the migrator file closure | Hostless deployment `#83e4137e` for `b0756dd` built successfully then crashed with exit code 1; runtime logs show `ENOENT` opening `/app/lib/db/migration-registry.json`; PR CI `42035700036` passed; local Docker check, full tests (18 files/126 tests), typecheck, market-mock guard, production build, and diff check passed. Hostless shows only `DATABASE_URL`; `MIGRATION_DATABASE_URL` is absent; database is Healthy. | Add a separate least-privilege DDL migrator credential as Hostless secret `MIGRATION_DATABASE_URL`; then merge PR #27 and verify the new deployment and `/api/ready` | No safe migration credential exists in app settings. Do not reuse or reveal `DATABASE_URL`. Docker daemon unavailable locally; no disposable PostgreSQL or WORM evidence |
 | A-06 | Independent immutable/WORM audit-chain anchor | `BLOCKED` | No external storage receipt or custody evidence in repository | Repository-local hash/snapshot cannot prove independent immutability | Obtain evidence for separate immutable destination, independent key custody, signed snapshot, and verifiable receipt | Requires operator/provider evidence |
 
 ### Detail for A-01: prior audit's reported changes (not fully present/verified)
@@ -124,6 +124,24 @@ Call the overall scanner/audit task complete only when each relevant tracker row
 - Blocker: none for this source/test slice; live and production evidence remain unavailable
 
 ## Change log
+
+### 2026-11-05 20:25 WIB — A-05 — migration registry runtime fix locally verified
+- Status: IN PROGRESS
+- Branch / commit: `fix/A-05-migration-registry-2026-11-05` / `ca78ae94df7e97922e70abc1fd6a21df9f3206d8`
+- Changed files: `Dockerfile`, `scripts/check-docker-security.mjs`, `docs/AGENT-HANDOFF.md`
+- Verification: Hostless deployment `#83e4137e` logs report `ENOENT` for `/app/lib/db/migration-registry.json`; required runtime asset audit confirms this is the sole missing source file in the migrator chain. Local `pnpm check:docker-security`, `pnpm test` (18 files/126 tests), `pnpm typecheck`, `pnpm check:market-mocks`, `pnpm build`, and `git diff --check` passed.
+- Not verified: actual Docker image/runtime locally (Docker unavailable), post-fix Hostless deployment/readiness, database migration against production, and external WORM anchor.
+- Next action: commit/push the fix, open a PR, verify CI, then inspect the Hostless configuration before release.
+- Blocker: none for the source/CI slice; Docker daemon unavailable locally and production runtime verification awaits a safe migrator secret.
+
+### 2026-11-05 20:31 WIB — A-05 — deployment gated on missing migration secret
+- Status: BLOCKED
+- Branch / commit: `fix/A-05-migration-registry-2026-11-05` / PR #27 head `ca78ae94df7e97922e70abc1fd6a21df9f3206d8`
+- Changed files: Hostless dashboard inspected read-only; no app settings changed.
+- Verification: Hostless app Environment variables shows one production variable, `DATABASE_URL`; `MIGRATION_DATABASE_URL` is absent. Hostless `indosignal-db` reports Healthy. PR CI `42035700036` passed.
+- Not verified: post-fix deployment/readiness, production migration execution, local Docker runtime, and external WORM anchor.
+- Next action: add a separate least-privilege DDL migrator secret `MIGRATION_DATABASE_URL` in Hostless, then merge PR #27 and verify the deployment.
+- Blocker: no safe DDL migrator credential is configured; do not reuse the runtime URL or inspect/reveal its value.
 
 ### 2026-11-05 19:10 WIB — A-05 — Hostless startup fix verified in CI
 - Status: IN PROGRESS
